@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مرشد التخطيط الدراسي الجامعي | University Academic Planner</title>
+  <meta name="description" content="Bilingual academic planning tool for Mutah University students — track completed courses, plan next semester, and monitor graduation progress across all civilian colleges.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23059669'/%3E%3Cpath d='M12 6l7 3.2-7 3.2-7-3.2L12 6z' fill='white'/%3E%3Cpath d='M7 11.5V15c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-3.5' stroke='white' stroke-width='1.3' fill='none'/%3E%3C/svg%3E">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="preload" as="image" href="campus-mobile.webp" type="image/webp" media="(max-width: 767px)" fetchpriority="high">
+  <link rel="preload" as="image" href="campus.webp" type="image/webp" media="(min-width: 768px)" fetchpriority="high">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          boxShadow: { 'xs': '0 1px 2px 0 rgb(0 0 0 / 0.05)', '2xs': '0 1px 0 0 rgb(0 0 0 / 0.05)' },
+          scale: { '98': '0.98' },
+          fontFamily: {
+            sans: ['Inter', 'IBM Plex Sans Arabic', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    [v-cloak] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    [dir="rtl"] body {
+      font-family: 'IBM Plex Sans Arabic', 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    .space-grotesk {
+      font-family: 'Bricolage Grotesque', sans-serif;
+    }
+    /* Subtle entrance animation for content cards */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeInUp 0.35s ease-out;
+    }
+    main > div > div {
+      animation: fadeInUp 0.4s ease-out;
+    }
+    /* Accessible focus states throughout */
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid #059669;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    /* Simple custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .animate-fadeIn, main > div > div { animation: none; }
+    }
+
+    /* ===== Cinematic Cover Hero ===== */
+    #cover-hero { position: relative; height: 100vh; height: 100svh; width: 100%; overflow: hidden;
+      background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%); }
+    .lucide-icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 0; }
+    .skip-link { position: absolute; top: -48px; inset-inline-start: 8px; z-index: 100; background: #fff; color: #065f46;
+      padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; transition: top .2s; }
+    .skip-link:focus { top: 8px; }
+    #cover-hero .cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+    #cover-hero .cover-scrim {
+      position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(180deg, rgba(4,10,8,0.55) 0%, rgba(4,10,8,0.12) 30%, rgba(4,10,8,0.22) 58%, rgba(3,8,6,0.9) 100%);
+    }
+    #cover-hero .cover-blur {
+      position: absolute; inset: 0; z-index: 2; pointer-events: none;
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+      -webkit-mask-image: linear-gradient(to top, black 0%, transparent 45%);
+      mask-image: linear-gradient(to top, black 0%, transparent 45%);
+    }
+    .liquid-glass {
+      background: rgba(255,255,255,0.08);
+      background-blend-mode: luminosity;
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: none; position: relative; overflow: hidden;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.18);
+      transition: background 0.25s ease;
+    }
+    .liquid-glass:hover { background: rgba(255,255,255,0.14); }
+    .liquid-glass::before {
+      content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.4px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.15) 20%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.5) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      pointer-events: none;
+    }
+    @keyframes blurFadeUp {
+      from { opacity: 0; filter: blur(20px); transform: translateY(40px); }
+      to { opacity: 1; filter: blur(0); transform: translateY(0); }
+    }
+    .animate-blur-fade-up { opacity: 0; animation: blurFadeUp 1s ease-out forwards; }
+    @keyframes bounceDown { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+    .scroll-bounce { animation: bounceDown 1.8s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .animate-blur-fade-up { animation: none; opacity: 1; }
+      .scroll-bounce { animation: none; }
+    }
+  </style>
+
+  <!-- Saif chat widget styles -->
+  <style>
+  .saif {
+    --saif-sky: #0ea5e9;
+    --saif-sky-soft: #7dd3fc;
+    --saif-ink: #0c2a3f;
+    --saif-muted: #6b8294;
+    --saif-bg: #f3f8fc;
+    --saif-line: #e2edf5;
+    position: fixed;
+    inset-inline-start: 20px;           /* يسار في RTL، يمين في LTR */
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    z-index: 9999;
+    font-family: 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color: var(--saif-ink);
+  }
+  .saif *, .saif *::before, .saif *::after { box-sizing: border-box; }
+  .saif :where(button, input) { font: inherit; color: inherit; }
+
+  /* ---------- الأيقونة العائمة ---------- */
+  .saif-bubble {
+    width: 60px; height: 60px; border: 0; border-radius: 50%; cursor: pointer;
+    display: grid; place-items: center; color: #fff;
+    background: linear-gradient(145deg, var(--saif-sky-soft), var(--saif-sky));
+    box-shadow: 0 10px 28px rgba(14,165,233,.35), inset 0 1px 0 rgba(255,255,255,.45);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .saif-bubble:hover { transform: scale(1.06); }
+  .saif-bubble svg { width: 28px; height: 28px; transition: transform .25s ease, opacity .2s ease; grid-area: 1 / 1; }
+  .saif-bubble .saif-ico-close { opacity: 0; transform: rotate(-60deg) scale(.6); }
+  .saif.is-open .saif-bubble .saif-ico-chat { opacity: 0; transform: rotate(60deg) scale(.6); }
+  .saif.is-open .saif-bubble .saif-ico-close { opacity: 1; transform: none; }
+
+  .saif button:focus-visible, .saif input:focus-visible { outline: 3px solid rgba(14,165,233,.45); outline-offset: 2px; }
+  .saif .saif-bubble:focus-visible { border-radius: 50%; }
+  .saif .saif-x:focus-visible { border-radius: 10px; }
+  .saif .saif-send:focus-visible, .saif .saif-input:focus-visible { border-radius: 14px; }
+
+  /* ---------- النافذة ---------- */
+  .saif-panel {
+    position: absolute; inset-inline-start: 0; bottom: 76px;
+    width: min(360px, calc(100vw - 40px));
+    height: min(520px, calc(100dvh - 120px));
+    display: flex; flex-direction: column; overflow: hidden;
+    background: #fff; border: 1px solid var(--saif-line); border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(12,42,63,.18);
+    transform-origin: bottom left;
+    opacity: 0; transform: translateY(12px) scale(.96); visibility: hidden; pointer-events: none;
+    transition: opacity .22s ease, transform .22s ease, visibility 0s linear .22s;
+  }
+  [dir="rtl"] .saif-panel, .saif[dir="rtl"] .saif-panel { transform-origin: bottom left; }
+  .saif.is-open .saif-panel {
+    opacity: 1; transform: none; visibility: visible; pointer-events: auto;
+    transition: opacity .22s ease, transform .22s ease;
+  }
+
+  /* ---------- الترويسة ---------- */
+  .saif-head {
+    display: flex; align-items: center; gap: 12px; padding: 16px 18px; color: #fff;
+    background: linear-gradient(135deg, var(--saif-sky) 0%, var(--saif-sky-soft) 100%);
+  }
+  .saif-avatar {
+    width: 42px; height: 42px; flex: none; border-radius: 14px; display: grid; place-items: center;
+    background: rgba(255,255,255,.22); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35);
+  }
+  .saif-avatar svg { width: 24px; height: 24px; }
+  .saif-name { font-size: 18px; font-weight: 600; line-height: 1.2; }
+  .saif-name small { font-weight: 400; opacity: .9; font-size: 12px; margin-inline-start: 6px; }
+  .saif-status { display: flex; align-items: center; gap: 6px; font-size: 12px; opacity: .95; margin-top: 2px; }
+  .saif-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #b9f6ca; }
+  .saif-x {
+    margin-inline-start: auto; width: 34px; height: 34px; border: 0; border-radius: 10px; cursor: pointer;
+    background: rgba(255,255,255,.16); color: #fff; display: none; place-items: center;
+  }
+  .saif-x svg { width: 18px; height: 18px; }
+
+  /* ---------- الرسائل ---------- */
+  .saif-log {
+    flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 10px;
+    background: var(--saif-bg); scroll-behavior: smooth;
+  }
+  .saif-msg {
+    max-width: 82%; padding: 10px 14px; font-size: 14.5px; line-height: 1.65;
+    border-radius: 18px; overflow-wrap: anywhere; white-space: pre-wrap;
+    animation: saif-in .2s ease-out;
+  }
+  .saif-msg.bot  { align-self: flex-start; background: #fff; border: 1px solid var(--saif-line); border-end-start-radius: 6px; }
+  .saif-msg.user { align-self: flex-end; color: #fff; background: linear-gradient(145deg, var(--saif-sky), #38bdf8); border-end-end-radius: 6px; }
+  .saif-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+  .saif-chips button {
+    border: 1px solid #bfe3f7; background: #fff; color: #0369a1; border-radius: 999px; cursor: pointer;
+    padding: 7px 13px; font-size: 13px; line-height: 1.3; transition: background .15s, border-color .15s;
+  }
+  .saif-chips button:hover { background: #e8f6fd; border-color: var(--saif-sky); }
+  .saif-typing { display: inline-flex; gap: 4px; align-items: center; padding: 14px; }
+  .saif-typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--saif-sky-soft); animation: saif-dot 1s infinite ease-in-out; }
+  .saif-typing i:nth-child(2) { animation-delay: .15s; }
+  .saif-typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes saif-in  { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes saif-dot { 0%, 80%, 100% { transform: translateY(0); opacity: .5; } 40% { transform: translateY(-4px); opacity: 1; } }
+
+  /* ---------- حقل الإدخال ---------- */
+  .saif-form { display: flex; gap: 8px; padding: 12px; background: #fff; border-top: 1px solid var(--saif-line); }
+  .saif-input {
+    flex: 1; min-width: 0; height: 44px; padding: 0 16px; border: 1px solid var(--saif-line); border-radius: 14px;
+    background: var(--saif-bg); font-size: 16px;      /* 16px يمنع تكبير الشاشة تلقائياً في iPhone */
+  }
+  .saif-input::placeholder { color: var(--saif-muted); }
+  .saif-send {
+    width: 44px; height: 44px; flex: none; border: 0; border-radius: 14px; cursor: pointer; color: #fff;
+    display: grid; place-items: center; background: linear-gradient(145deg, var(--saif-sky-soft), var(--saif-sky));
+    transition: opacity .2s, transform .15s;
+  }
+  .saif-send:active { transform: scale(.94); }
+  .saif-send:disabled { opacity: .45; cursor: not-allowed; }
+  .saif-send svg { width: 20px; height: 20px; }
+  [dir="rtl"] .saif-send svg, .saif[dir="rtl"] .saif-send svg { transform: scaleX(-1); }   /* السهم يتجه لليسار في العربية */
+
+  /* ---------- الموبايل: النافذة تملأ عرض الشاشة تقريباً ---------- */
+  @media (max-width: 480px) {
+    .saif { inset-inline-start: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+    .saif-panel { position: fixed; inset-inline: 12px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); width: auto; height: min(540px, calc(100dvh - 110px)); }
+    .saif-x { display: grid; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .saif *, .saif *::before, .saif *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+  <a href="#main-content" class="skip-link">تخطَّ إلى المحتوى / Skip to content</a>
+
+  <div id="app" v-cloak>
+    <div :class="isRTL ? 'text-right' : 'text-left'" :style="{ direction: isRTL ? 'rtl' : 'ltr' }">
+
+      <!-- ===================== CINEMATIC COVER HERO ===================== -->
+      <section id="cover-hero" aria-labelledby="hero-title">
+        <picture>
+          <source media="(max-width: 767px)" srcset="campus-mobile.webp" type="image/webp" />
+          <img src="campus.webp" alt="Mutah University Campus" class="cover-img" width="1366" height="550" decoding="async" fetchpriority="high" />
+        </picture>
+        <div class="cover-scrim"></div>
+        <div class="cover-blur"></div>
+
+        <div class="relative z-10 h-full w-full flex flex-col">
+
+          <!-- Hero Navbar -->
+          <nav class="flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 md:py-6">
+            <div class="flex items-center gap-2.5 animate-blur-fade-up" style="animation-delay:0ms">
+              <div class="w-9 h-9 md:w-10 md:h-10 rounded-full liquid-glass flex items-center justify-center shrink-0">
+                <lucide-icon name="graduation-cap" class="h-4 w-4 md:h-5 md:w-5 text-white"></lucide-icon>
+              </div>
+              <div class="leading-tight">
+                <div class="text-white font-extrabold text-sm md:text-base tracking-tight">{{ isRTL ? 'جامعة مؤتة' : 'MUTAH UNIVERSITY' }}</div>
+                <div class="text-white/50 text-[10px] md:text-xs font-medium">{{ isRTL ? 'مرشد التخطيط الدراسي' : 'Academic Planner' }}</div>
+              </div>
+            </div>
+
+            <div class="hidden lg:flex items-center gap-8">
+              <a :href="startHref" class="text-sm text-white/80 hover:text-white transition-colors animate-blur-fade-up" style="animation-delay:100ms">{{ isRTL ? 'المستكشف' : 'Explorer' }}</a>
+              <a :href="planHref" class="text-sm text-white/80 hover:text-white transition-colors animate-blur-fade-up" style="animation-delay:150ms">{{ isRTL ? 'المخطط' : 'Planner' }}</a>
+              <a :href="startHref" class="text-sm text-white/80 hover:text-white transition-colors animate-blur-fade-up" style="animation-delay:200ms">{{ isRTL ? 'التقدم' : 'Progress' }}</a>
+            </div>
+
+            <div class="flex items-center gap-2.5 sm:gap-3">
+              <button @click="toggleLang" class="hidden sm:flex items-center gap-1.5 rounded-full liquid-glass text-white text-xs sm:text-sm font-semibold px-4 md:px-5 py-2 md:py-2.5 animate-blur-fade-up" style="animation-delay:350ms">
+                <lucide-icon name="languages" class="h-4 w-4"></lucide-icon>
+                <span>{{ lang === 'ar' ? 'English' : 'العربية' }}</span>
+              </button>
+              <button @click="heroMenuOpen = !heroMenuOpen" :aria-expanded="heroMenuOpen" :aria-label="isRTL ? 'القائمة' : 'Menu'" class="lg:hidden w-10 h-10 rounded-full liquid-glass flex items-center justify-center text-white animate-blur-fade-up" style="animation-delay:350ms">
+                <lucide-icon :name="heroMenuOpen ? 'x' : 'menu'" class="h-[18px] w-[18px]"></lucide-icon>
+              </button>
+            </div>
+          </nav>
+
+          <!-- Mobile Menu -->
+          <div class="lg:hidden absolute left-0 right-0 top-[64px] z-40 transition-all duration-500 ease-out"
+               :class="heroMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'">
+            <div class="mx-4 rounded-2xl bg-black/70 backdrop-blur-lg border border-white/10 shadow-2xl p-3">
+              <a :href="startHref" @click="heroMenuOpen=false" class="block py-2.5 px-3 rounded-lg text-white/90 hover:bg-white/10 text-sm">{{ isRTL ? 'المستكشف' : 'Explorer' }}</a>
+              <a :href="planHref" @click="heroMenuOpen=false" class="block py-2.5 px-3 rounded-lg text-white/90 hover:bg-white/10 text-sm">{{ isRTL ? 'المخطط' : 'Planner' }}</a>
+              <button @click="toggleLang" class="w-full mt-1 flex items-center gap-2 py-2.5 px-3 rounded-lg text-white/90 hover:bg-white/10 text-sm border-t border-white/10 pt-3">
+                <lucide-icon name="languages" class="h-4 w-4"></lucide-icon>
+                <span>{{ lang === 'ar' ? 'English' : 'العربية' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hero Content -->
+          <div class="flex-1 flex flex-col justify-end px-4 sm:px-6 md:px-12 pb-10 md:pb-16">
+            <div class="flex flex-col md:flex-row items-end gap-8 md:gap-10">
+
+              <div class="flex-1 min-w-0" :class="isRTL ? 'text-right' : 'text-left'">
+                <div class="flex flex-wrap items-center gap-3 sm:gap-5 mb-5 md:mb-7 text-xs sm:text-sm text-white/80 animate-blur-fade-up" style="animation-delay:300ms">
+                  <span class="flex items-center gap-1.5 font-medium"><lucide-icon name="building-2" class="h-4 w-4"></lucide-icon>{{ isRTL ? '15 كلية مدنية' : '15 Civilian Colleges' }}</span>
+                  <span class="flex items-center gap-1.5"><lucide-icon name="book-open" class="h-4 w-4"></lucide-icon>{{ isRTL ? 'جميع التخصصات' : 'Every Major Covered' }}</span>
+                  <span class="flex items-center gap-1.5"><lucide-icon name="sparkles" class="h-4 w-4"></lucide-icon>{{ isRTL ? 'مشروع طالب مستقل' : 'Built by a Mutah Student' }}</span>
+                </div>
+
+                <h1 id="hero-title" class="text-white font-normal text-3xl sm:text-5xl md:text-6xl lg:text-7xl mb-4 md:mb-6 animate-blur-fade-up" style="letter-spacing:-0.04em; animation-delay:400ms">
+                  {{ isRTL ? 'مسارك الدراسي، مخطط بالكامل.' : 'Your Degree. Mapped Out.' }}
+                </h1>
+
+                <p class="text-white/70 text-base sm:text-lg md:text-xl mb-8 md:mb-12 max-w-2xl animate-blur-fade-up" style="animation-delay:500ms">
+                  {{ isRTL
+                    ? 'تتبّع مساقاتك المنجزة، وخطط لفصلك القادم، وراقب تقدمك نحو التخرج — لكل كلية وتخصص في جامعة مؤتة.'
+                    : 'Track completed courses, plan next semester, and watch your progress toward graduation — for every college and major at Mutah University.' }}
+                </p>
+
+                <div class="flex flex-wrap gap-3 sm:gap-4">
+                  <a :href="startHref" class="inline-flex items-center gap-2 bg-white text-black rounded-full font-semibold px-6 sm:px-8 py-2.5 sm:py-3 hover:bg-gray-200 transition-colors animate-blur-fade-up" style="animation-delay:600ms">
+                    <lucide-icon name="play" class="h-[18px] w-[18px] fill-black"></lucide-icon>
+                    {{ isRTL ? 'ابدأ التخطيط' : 'Enter Planner' }}
+                  </a>
+                  <a :href="planHref" class="inline-flex items-center gap-2 rounded-full liquid-glass text-white font-semibold px-6 sm:px-8 py-2.5 sm:py-3 animate-blur-fade-up" style="animation-delay:700ms">
+                    <lucide-icon name="info" class="h-[18px] w-[18px]"></lucide-icon>
+                    {{ isRTL ? 'كيف يعمل؟' : 'How It Works' }}
+                  </a>
+                </div>
+              </div>
+
+              <div class="flex md:flex-col items-center gap-3 animate-blur-fade-up" style="animation-delay:800ms">
+                <a :href="startHref" class="w-11 h-11 rounded-full liquid-glass flex items-center justify-center text-white scroll-bounce" :aria-label="isRTL ? 'انتقل للأسفل' : 'Scroll down'">
+                  <lucide-icon name="chevron-down" class="h-5 w-5"></lucide-icon>
+                </a>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- =================== END CINEMATIC COVER HERO =================== -->
+
+      <!-- ===== PLANNER (shown only after a major is chosen) ===== -->
+      <template v-if="hasMajor">
+
+      <!-- Top Header / Navigation -->
+      <header id="planner-app" class="bg-white border-b border-slate-100 relative md:sticky md:top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            
+            <!-- Logo area & brand -->
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 bg-emerald-600 text-white rounded-2xl shadow-md shadow-emerald-600/10 shrink-0">
+                <lucide-icon name="graduation-cap" class="h-6 w-6"></lucide-icon>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <p class="text-lg font-black text-slate-800 tracking-tight">
+                    {{ isRTL ? 'مرشد التخطيط ومتابعة الخريجين الجامعي' : 'University Academic & Curriculum Planner' }}
+                  </p>
+                  <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-md px-1.5 py-0.5">
+                    {{ isRTL ? 'نسخة مستقلة' : 'Offline Version' }}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-400 font-medium font-sans">
+                  {{ isRTL ? 'احسب ساعاتك، وخطط جدولك الدراسي بمرونة' : 'Interactive degree audit and next semester curriculum planner' }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Controls (Search & Language Toggle) -->
+            <div class="flex items-center gap-3 flex-wrap">
+              <!-- Search Box -->
+              <div class="relative min-w-[200px] md:min-w-[280px]">
+                <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
+                  <lucide-icon name="search" class="h-4 w-4"></lucide-icon>
+                </span>
+                <input 
+                  type="text" 
+                  v-model="searchQuery"
+                  :aria-label="isRTL ? 'ابحث عن مساق' : 'Search courses'"
+                  :placeholder="isRTL ? 'ابحث باسم أو رمز المساق (مثال: تفاضل)...' : 'Search by name or code (e.g. Calculus)...'"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 pr-10 focus:outline-none focus:border-emerald-600 text-xs text-slate-700 font-sans"
+                />
+                <button 
+                  v-if="searchQuery" 
+                  @click="searchQuery = ''"
+                  :aria-label="isRTL ? 'مسح البحث' : 'Clear search'"
+                  class="absolute inset-y-0 left-3 flex items-center text-slate-400 hover:text-slate-600"
+                >
+                  <lucide-icon name="x" class="h-3 w-3"></lucide-icon>
+                </button>
+              </div>
+
+              <!-- Change Major -->
+              <button type="button" @click="resetMajor"
+                class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 rounded-xl px-4 py-2 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+                <lucide-icon name="repeat" class="h-4 w-4"></lucide-icon>
+                <span>{{ isRTL ? 'تغيير التخصص' : 'Change Major' }}</span>
+              </button>
+
+              <!-- Language Button -->
+              <button 
+                @click="toggleLang"
+                class="bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <lucide-icon name="languages" class="h-4 w-4 text-slate-400"></lucide-icon>
+                <span>{{ lang === 'ar' ? 'English' : 'العربية' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Progress Header Panel -->
+          <div class="mt-5 bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-5 md:p-6 text-white shadow-md shadow-emerald-900/10">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              
+              <!-- Left side detail -->
+              <div class="md:col-span-8 space-y-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded-md text-white border border-white/5 font-sans">
+                    {{ isRTL ? selectedMajor.collegeAr : selectedMajor.collegeEn }}
+                  </span>
+                </div>
+                
+                <h2 class="text-xl md:text-2xl font-black">
+                  {{ isRTL ? selectedMajor.nameAr : selectedMajor.nameEn }}
+                </h2>
+                
+                <p class="text-xs text-emerald-100 max-w-xl leading-relaxed">
+                  {{ isRTL 
+                    ? 'بوابة تتبع المساقات المنجزة والمواد المقترحة. تم حساب متطلبات التخرج وتوزيع الأعباء وفقاً لأحدث التعليمات وتوصيات كليتك وأقسامها.' 
+                    : 'Track your completed courses and build your upcoming semester draft. Calculations and credits are based on established curriculum plans.' 
+                  }}
+                </p>
+              </div>
+
+              <!-- Right side progress indicator -->
+              <div class="md:col-span-4 bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col justify-end">
+                <div class="flex items-center justify-between text-xs font-bold text-emerald-100 mb-1.5">
+                  <span>{{ isRTL ? 'معدل التقدم الدراسي للتخرج' : 'DEGREE PROGRESS' }}</span>
+                  <span class="font-mono text-sm font-extrabold text-white">{{ progressPercent }}%</span>
+                </div>
+                
+                <!-- Progress bar track -->
+                <div class="w-full bg-black/25 rounded-full h-2 overflow-hidden mb-3.5">
+                  <div class="bg-gradient-to-r from-emerald-400 to-teal-300 h-2 rounded-full transition-all duration-500" :style="{ width: progressPercent + '%' }"></div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-[9px] font-bold text-emerald-100 uppercase tracking-widest block font-sans">{{ isRTL ? 'المنجز' : 'COMPLETED' }}</span>
+                    <span class="text-base font-black text-white font-mono leading-none">{{ completedSum }} / {{ selectedMajor.totalHours }} <span class="text-[10px] text-emerald-100">{{ isRTL ? 'ساعة' : 'Hrs' }}</span></span>
+                  </div>
+
+                  <div class="text-left">
+                    <span class="text-[9px] font-bold text-emerald-100 uppercase tracking-widest block font-sans">{{ isRTL ? 'المتبقي' : 'REMAINING' }}</span>
+                    <span class="text-base font-black text-white font-mono leading-none">{{ Math.max(0, selectedMajor.totalHours - completedSum) }} <span class="text-[10px] text-emerald-100">{{ isRTL ? 'ساعة' : 'Hrs' }}</span></span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- Mobile-only slim sticky bar: keeps progress visible without covering the courses -->
+      <div class="md:hidden sticky top-0 z-40 bg-emerald-700 text-white shadow-md" style="padding-top: env(safe-area-inset-top, 0px);">
+        <div class="px-4 py-2 flex items-center gap-3">
+          <span class="text-xs font-extrabold truncate flex-1 min-w-0">{{ isRTL ? selectedMajor.nameAr : selectedMajor.nameEn }}</span>
+          <span class="text-[11px] font-bold font-mono text-emerald-100 shrink-0">{{ completedSum }} / {{ selectedMajor.totalHours }}</span>
+          <span class="text-xs font-black font-mono shrink-0">{{ progressPercent }}%</span>
+        </div>
+        <div class="h-1 bg-black/25">
+          <div class="h-1 bg-gradient-to-r from-emerald-300 to-teal-200 transition-all duration-500" :style="{ width: progressPercent + '%' }"></div>
+        </div>
+      </div>
+
+      <!-- Main Layout Sand -->
+      <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- MAIN PANE (8 Columns) -->
+          <div class="lg:col-span-8 space-y-6">
+            
+            <!-- Quick Tip Box -->
+            <div class="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4 flex gap-3.5 items-start">
+              <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl shrink-0">
+                <lucide-icon name="shield-check" class="h-5 w-5"></lucide-icon>
+              </div>
+              <div>
+                <h3 class="font-bold text-xs md:text-sm text-slate-800">
+                  {{ isRTL ? 'مزامنة الخطة الدراسية وتتبع الساعات' : 'Syllabus Alignment & Hour Checking' }}
+                </h3>
+                <p class="text-[11px] text-slate-500 leading-relaxed mt-1 font-sans">
+                  {{ isRTL 
+                    ? 'اضغط على زر "تم اجتيازها" (✓) على أي مادة لحساب إنجازك الفعلي للتخرج تلقائياً. المربع الثاني (+) مخصص لتخطيط جدولك للفصل القادم في العمود الجانبي.' 
+                    : 'Click "Passed" (✓) on any course cards below to calculate your graduate progress. Use the (+) planner button to coordinate next term studies.' 
+                  }}
+                </p>
+              </div>
+            </div>
+
+            <!-- CURRICULUM EXPLORER SECTION -->
+            <div class="p-1">
+              
+              <!-- Select Major & College Header -->
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-slate-100 rounded-2xl shadow-xs p-4 mb-5">
+                <div class="flex flex-col sm:flex-row gap-3">
+                  <div>
+                    <label for="hdr-college" class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                      {{ isRTL ? 'اختر الكلية' : 'FACULTY' }}
+                    </label>
+                    <select id="hdr-college" :value="headerCollegeKey" @change="onHeaderCollegeChange($event.target.value)"
+                      class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[200px] max-w-full">
+                      <option v-for="g in collegeGroups" :key="g.key" :value="g.key">{{ isRTL ? g.nameAr : g.nameEn }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="hdr-major" class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                      {{ isRTL ? 'اختر التخصص' : 'MAJOR' }}
+                    </label>
+                    <select id="hdr-major" v-model="selectedMajorId" @change="handleMajorChange"
+                      class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[220px] max-w-full">
+                      <option v-for="m in headerMajors" :key="m.id" :value="m.id">{{ isRTL ? m.nameAr : m.nameEn }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 self-end text-[11px] font-semibold text-slate-500 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
+                  <lucide-icon name="book-open" class="h-4 w-4 text-slate-400"></lucide-icon>
+                  <span>
+                    {{ isRTL ? 'الخطة مقسمة لسنوات وفصول معتمدة' : 'Structured sequence based on University plans' }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Search Overlay Mode -->
+              <div v-if="searchQuery.trim() !== ''">
+                <div class="flex items-center justify-between mb-3 bg-indigo-50/50 p-2.5 rounded-xl border border-indigo-100/50">
+                  <span class="text-xs font-bold text-indigo-800 flex items-center gap-2">
+                    <lucide-icon name="search" class="h-3.5 w-3.5 text-indigo-500"></lucide-icon>
+                    {{ isRTL ? 'نتائج البحث المطابقة للتخصص (' + searchedCourses.length + ')' : 'Matches in current major (' + searchedCourses.length + ')' }}
+                  </span>
+                  <button @click="searchQuery = ''" class="text-[10px] text-slate-400 hover:text-slate-600">
+                    {{ isRTL ? 'إلغاء البحث' : 'Clear Search' }}
+                  </button>
+                </div>
+
+                <!-- No Matches -->
+                <div v-if="searchedCourses.length === 0" class="py-12 text-center bg-slate-50 border border-dashed border-slate-200 rounded-xl">
+                  <lucide-icon name="help-circle" class="h-8 w-8 text-slate-300 mx-auto mb-2"></lucide-icon>
+                  <h4 class="text-xs font-bold text-slate-500 mb-0.5">{{ isRTL ? 'لا توجد نتائج مطابقة' : 'No courses found' }}</h4>
+                  <p class="text-[10px] text-slate-400 px-6">
+                    {{ isRTL ? 'يرجى كتابة الكلمات بشكل سليم والبحث باسم المادة' : 'Try typing a different keyword or check spelling.' }}
+                  </p>
+                </div>
+
+                <!-- Grid match -->
+                <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[480px] overflow-y-auto pr-1 animate-fadeIn">
+                  <div 
+                    v-for="item in searchedCourses"
+                    :key="item.course.id"
+                    class="border rounded-xl p-3 flex flex-col justify-between transition-all duration-300"
+                    :class="isCompleted(item.course.id) ? 'bg-emerald-50/20 border-emerald-500/20 shadow-2xs' : isPlanned(item.course.id) ? 'bg-slate-50/80 border-emerald-500/30' : 'bg-white border-slate-100 hover:border-slate-300'"
+                  >
+                    <div>
+                      <div class="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+                        <span class="text-[9px] font-mono font-medium px-1.5 py-px rounded border" :class="getCourseTypeClass(item.course.type)">
+                          {{ getCourseTypeLabel(item.course.type) }}
+                        </span>
+                        <span class="text-[9px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-px rounded-md">
+                          {{ item.yearName }} • {{ item.semName }}
+                        </span>
+                      </div>
+                      <h4 class="text-xs font-extrabold text-slate-700 leading-snug">{{ item.course.name }}</h4>
+                      <div class="flex items-center gap-1.5 mt-2.5 text-[10px] text-slate-400 font-sans">
+                        <span v-if="item.course.code" class="font-mono bg-slate-100 px-1 rounded text-slate-500 text-[9px]">{{ item.course.code }}</span>
+                        <lucide-icon name="clock" class="h-3.5 w-3.5 text-slate-300 shrink-0"></lucide-icon>
+                        <span>{{ item.course.credits }} {{ isRTL ? 'ساعة' : 'Hrs' }}</span>
+                      </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-1.5 border-t border-slate-50 pt-2.5 mt-2.5">
+                      <button 
+                        @click="toggleComplete(item.course.id)"
+                        class="flex-1 text-[10px] font-bold py-2.5 px-2 rounded-lg flex items-center justify-center gap-1 cursor-pointer min-h-[38px] transition-colors"
+                        :class="isCompleted(item.course.id) ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-100'"
+                      >
+                        <lucide-icon name="check" class="h-3.5 w-3.5"></lucide-icon>
+                        <span>{{ isRTL ? 'تم اجتيازها' : 'Passed' }}</span>
+                      </button>
+                      <button 
+                        @click="togglePlan(item.course.id)"
+                        :disabled="isCompleted(item.course.id)"
+                        class="text-[10px] font-bold py-2.5 px-2 rounded-lg flex items-center justify-center gap-1 cursor-pointer min-h-[38px] transition-all disabled:opacity-50"
+                        :class="isPlanned(item.course.id) ? 'bg-rose-50 border border-rose-100 text-rose-600' : 'bg-emerald-50 text-emerald-700' "
+                      >
+                        <lucide-icon name="plus" class="h-3.5 w-3.5" :class="isPlanned(item.course.id) ? 'rotate-45' : ''"></lucide-icon>
+                        <span>{{ isPlanned(item.course.id) ? (isRTL ? 'إزالة' : 'Remove') : (isRTL ? 'تخطيط' : 'Plan') }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Sequenced Years & Semesters Explorer -->
+              <div v-else>
+                
+                <!-- Year Toggles -->
+                <div class="flex items-center gap-1 overflow-x-auto pb-2 mb-4 border-b border-slate-100">
+                  <button 
+                    v-for="year in selectedMajor.years" 
+                    :key="year.yearId"
+                    @click="activeYearId = year.yearId; activeSemesterId = year.semesters && year.semesters.length > 0 ? year.semesters[0].semesterId : 'first'"
+                    class="px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                    :class="activeYearId === year.yearId ? 'bg-emerald-600 text-white font-extrabold shadow-sm' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'"
+                  >
+                    {{ isRTL ? year.nameAr : year.nameEn }}
+                  </button>
+                </div>
+
+                <!-- Semester Toggles -->
+                <div v-if="currentYearData.semesters && currentYearData.semesters.length > 0" class="flex items-center gap-1.5 mb-4 bg-slate-50 p-1 rounded-xl w-fit">
+                  <button 
+                    v-for="sem in currentYearData.semesters" 
+                    :key="sem.semesterId"
+                    @click="activeSemesterId = sem.semesterId"
+                    class="px-4 py-1.5 text-[11px] font-extrabold rounded-lg transition-all cursor-pointer"
+                    :class="activeSemesterId === sem.semesterId ? 'bg-white text-emerald-600 shadow-sm border border-slate-100' : 'text-slate-500 hover:text-slate-700'"
+                  >
+                    {{ isRTL ? sem.nameAr : sem.nameEn }}
+                  </button>
+                </div>
+
+                <!-- Courses Display Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div 
+                    v-for="course in activeSemesterCourses"
+                    :key="course.id"
+                    class="border rounded-2xl p-4 flex flex-col justify-between transition-all duration-300"
+                    :class="isCompleted(course.id) ? 'bg-emerald-50/20 border-emerald-500/20 shadow-2xs' : isPlanned(course.id) ? 'bg-slate-50/80 border-emerald-500/30' : 'bg-white border-slate-100 hover:border-slate-300 hover:shadow-xs'"
+                  >
+                    <div>
+                      <div class="mb-2">
+                        <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border" :class="getCourseTypeClass(course.type)">
+                          {{ getCourseTypeLabel(course.type) }}
+                        </span>
+                      </div>
+                      <h4 class="text-xs md:text-sm font-black text-slate-800 leading-snug">{{ course.name }}</h4>
+                      <div class="flex items-center gap-1.5 mt-3 text-[10px] text-slate-500 font-sans">
+                        <span v-if="course.code" class="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 text-[9px]">{{ course.code }}</span>
+                        <lucide-icon name="clock" class="h-3.5 w-3.5 text-slate-300 shrink-0"></lucide-icon>
+                        <span>{{ course.credits }} {{ isRTL ? 'ساعات معتمدة' : 'Credits' }}</span>
+                      </div>
+                    </div>
+
+                    <!-- Footer Action Buttons -->
+                    <div class="flex gap-2 border-t border-slate-50 pt-2.5 mt-3.5">
+                      <button 
+                        @click="toggleComplete(course.id)"
+                        class="flex-1 text-[10px] font-bold py-2.5 px-2 rounded-lg flex items-center justify-center gap-1 cursor-pointer min-h-[38px] transition-colors"
+                        :class="isCompleted(course.id) ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-100'"
+                      >
+                        <lucide-icon name="check" class="h-3.5 w-3.5"></lucide-icon>
+                        <span>{{ isRTL ? 'إنجاز' : 'Pass' }}</span>
+                      </button>
+                      <button 
+                        @click="togglePlan(course.id)"
+                        :disabled="isCompleted(course.id)"
+                        class="text-[10px] font-bold py-2.5 px-2 rounded-lg flex items-center justify-center gap-1 cursor-pointer min-h-[38px] transition-all disabled:opacity-50"
+                        :class="isPlanned(course.id) ? 'bg-rose-50 border border-rose-100 text-rose-600' : 'bg-emerald-50 text-emerald-700'"
+                      >
+                        <lucide-icon name="plus" class="h-3.5 w-3.5" :class="isPlanned(course.id) ? 'rotate-45' : ''"></lucide-icon>
+                        <span>{{ isPlanned(course.id) ? (isRTL ? 'إلغاء' : 'Cancel') : (isRTL ? 'تخطيط' : 'Plan') }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+          <!-- SIDEBAR PANE (4 Columns) -->
+          <div id="planner-column" class="lg:col-span-4 space-y-6">
+            
+            <!-- PLANNER CARD -->
+            <div class="bg-white border border-slate-100 rounded-2xl shadow-xs p-5">
+              
+              <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                  <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl shrink-0">
+                    <lucide-icon name="calendar" class="h-5 w-5"></lucide-icon>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-800 text-sm md:text-base">
+                      {{ isRTL ? 'مسـودة السجـل الفصلي المقترح' : 'Next Semester Planner' }}
+                    </h3>
+                    <p class="text-[10px] text-slate-400">
+                      {{ isRTL ? 'توزيع عبء المواد للفصل القادم' : 'Add courses to calculate loads' }}
+                    </p>
+                  </div>
+                </div>
+                <span class="text-xs font-semibold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">
+                  {{ plannedCoursesList.length }} {{ isRTL ? 'مواد' : 'Courses' }}
+                </span>
+              </div>
+
+              <!-- Empty State -->
+              <div v-if="plannedCoursesList.length === 0" class="py-12 text-center flex flex-col items-center justify-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                <lucide-icon name="calendar" class="h-10 w-10 text-slate-300 mb-2 stroke-1"></lucide-icon>
+                <h4 class="text-xs font-semibold text-slate-400 mb-1">{{ isRTL ? 'لا يوجد مواد مختارة' : 'Planner is empty' }}</h4>
+                <p class="text-[10px] text-slate-400 px-4">
+                  {{ isRTL 
+                    ? 'انقر على زر التخطيط (+) بجانب أي مادة لتنسيق جدولك الفصلي المستقبلي هنا وحساب العبء الدراسي.' 
+                    : 'Click (+) button on any course card in catalog list to sync planned hours here.' 
+                  }}
+                </p>
+              </div>
+
+              <!-- Filled State -->
+              <div v-else class="space-y-4">
+                <!-- Stat Gauge -->
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div>
+                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                      {{ isRTL ? 'إجمالي الساعات المخططة' : 'TOTAL CREDITS' }}
+                    </span>
+                    <span class="text-3xl font-black text-slate-800 space-grotesk">
+                      {{ plannedCreditsSum }}
+                      <span class="text-xs font-semibold text-slate-500 mr-1">{{ isRTL ? 'ساعة' : 'Hrs' }}</span>
+                    </span>
+                  </div>
+                  <div class="text-center">
+                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                      {{ isRTL ? 'المجال النموذجي' : 'RECOMMENDED' }}
+                    </span>
+                    <span class="text-xs font-bold text-slate-700 space-grotesk">
+                      12 - 18 {{ isRTL ? 'ساعة' : 'Hrs' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Load status widget -->
+                <div class="border-l-2 pl-3 py-0.5 text-xs font-semibold flex items-center gap-2" :class="loadColor">
+                  <lucide-icon :name="loadIcon" class="h-4 w-4 shrink-0"></lucide-icon>
+                  <span>{{ loadText }}</span>
+                </div>
+
+                <!-- Course List inside planner -->
+                <div class="max-h-56 overflow-y-auto divide-y divide-slate-100 pr-1">
+                  <div 
+                    v-for="course in plannedCoursesList" 
+                    :key="course.id"
+                    class="flex items-center justify-between py-2.5 hover:bg-slate-50/60 group transition-colors"
+                  >
+                    <div class="min-w-0 pr-2" :class="isRTL ? 'text-right' : 'text-left'">
+                      <h4 class="text-xs font-bold text-slate-700 truncate">{{ course.name }}</h4>
+                      <div class="flex items-center gap-2 mt-0.5">
+                        <span v-if="course.code" class="text-[9px] font-mono font-medium text-slate-400 bg-slate-50 px-1 py-px rounded">
+                          {{ course.code }}
+                        </span>
+                        <span class="text-[10px] text-slate-500 font-sans">
+                          {{ course.credits }} {{ isRTL ? 'ساعات معتمدة' : 'Credits' }}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <button 
+                      @click="togglePlan(course.id)"
+                      :aria-label="isRTL ? 'إزالة المادة' : 'Remove course'"
+                      class="p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+                    >
+                      <lucide-icon name="trash-2" class="h-3.5 w-3.5"></lucide-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Guidance board alerts -->
+                <div class="border-l-2 border-amber-400 pl-3 py-0.5 space-y-1.5 text-[10px] text-slate-700 leading-relaxed font-sans">
+                  <h5 class="text-[11px] font-bold text-amber-800 flex items-center gap-1 mb-1">
+                    <lucide-icon name="sparkles" class="h-3.5 w-3.5 text-amber-600 shrink-0"></lucide-icon>
+                    {{ isRTL ? 'الملاحظات الإرشادية لجدولك' : 'Context Advisor Panel' }}
+                  </h5>
+                  <div v-for="tip in contextTips" :key="tip" class="font-medium">
+                    {{ tip }}
+                  </div>
+                </div>
+
+                <!-- Export Schedule -->
+                <button 
+                  @click="exportPlan"
+                  class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-transform active:scale-98 shadow-sm cursor-pointer font-sans"
+                >
+                  <lucide-icon name="file-text" class="h-4 w-4"></lucide-icon>
+                  <span>{{ isRTL ? 'تصدير جدول الفصل المقترح (.txt)' : 'Export Schedule Draft (.txt)' }}</span>
+                </button>
+
+              </div>
+
+            </div>
+
+            <!-- ABOUT / RESOURCES CARD -->
+            <div class="bg-white border border-slate-100 rounded-2xl shadow-xs overflow-hidden">
+              <div class="bg-slate-50 border-b border-slate-100 px-4 py-3 flex items-center gap-2">
+                <div class="p-1.5 bg-slate-800 text-white rounded-lg">
+                  <lucide-icon name="info" class="h-4 w-4"></lucide-icon>
+                </div>
+                <h3 class="font-bold text-slate-800 text-xs md:text-sm">
+                  {{ isRTL ? 'حول هذه الأداة' : 'About this tool' }}
+                </h3>
+              </div>
+
+              <div class="p-4 space-y-3">
+                <p class="text-[11px] text-slate-500 leading-relaxed font-sans">
+                  {{ isRTL
+                    ? 'أداة مستقلة وغير رسمية لمساعدة طلبة جامعة مؤتة على تتبع الساعات المنجزة وتخطيط الفصل القادم بسهولة عبر جميع الكليات المدنية. جميع البيانات محفوظة محلياً على متصفحك فقط.'
+                    : 'An independent, unofficial tool that helps Mutah University students track completed hours and plan their next semester across all civilian colleges. All data stays saved locally in your browser.' }}
+                </p>
+
+                <div class="flex items-start gap-2.5 border-l-2 border-amber-400 pl-3 py-0.5">
+                  <lucide-icon name="alert-triangle" class="h-4 w-4 text-amber-600 shrink-0 mt-0.5"></lucide-icon>
+                  <p class="text-[10px] text-slate-700 leading-relaxed font-sans">
+                    {{ isRTL
+                      ? 'هذه البوابة للاستخدام الإرشادي فقط وليست بديلاً عن نظام التسجيل الرسمي أو المرشد الأكاديمي المعتمد.'
+                      : 'For guidance only — always confirm your official schedule with the university registration system and your academic advisor.' }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-50">
+                  <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                    {{ isRTL ? 'تطوير' : 'Developed by' }}
+                  </span>
+                  <span class="text-xs font-extrabold text-slate-700 space-grotesk">Amro Azzam</span>
+                </div>
+
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                    {{ isRTL ? 'للتواصل' : 'Contact' }}
+                  </span>
+                  <a href="mailto:azzamamro787@gmail.com" dir="ltr"
+                     class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline break-all font-sans">
+                    <lucide-icon name="mail" class="h-3.5 w-3.5"></lucide-icon>
+                    azzamamro787@gmail.com
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </main>
+
+      </template>
+
+      <!-- ===== FACULTY & MAJOR SELECTION (first-visit screen) ===== -->
+      <main v-else id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+        <div class="max-w-xl mx-auto">
+          <div id="major-select" class="bg-white border border-slate-100 rounded-3xl shadow-sm p-6 md:p-8 scroll-mt-6">
+
+            <div class="text-center mb-7">
+              <div class="inline-flex p-3 bg-emerald-50 text-emerald-600 rounded-2xl mb-4">
+                <lucide-icon name="graduation-cap" class="h-7 w-7"></lucide-icon>
+              </div>
+              <h2 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight mb-2">
+                {{ isRTL ? 'اختر الكلية / التخصص' : 'Select Faculty / Major' }}
+              </h2>
+              <p class="text-xs md:text-sm text-slate-500 leading-relaxed">
+                {{ isRTL
+                  ? 'اختر كليتك ثم تخصصك. سنتذكر اختيارك في هذا المتصفح للزيارات القادمة.'
+                  : 'Choose your faculty, then your major. Your choice is remembered in this browser for next time.' }}
+              </p>
+            </div>
+
+            <div class="space-y-5">
+              <!-- 1. Faculty -->
+              <div>
+                <label for="college-picker" class="flex items-center gap-2 text-xs font-bold text-slate-500 mb-1.5">
+                  <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center">1</span>
+                  {{ isRTL ? 'اختر الكلية' : 'Choose Faculty' }}
+                </label>
+                <select id="college-picker" v-model="pendingCollege" @change="onCollegeChange"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                  <option value="" disabled>{{ isRTL ? 'اختر الكلية...' : 'Select a faculty...' }}</option>
+                  <option v-for="g in collegeGroups" :key="g.key" :value="g.key">{{ isRTL ? g.nameAr : g.nameEn }}</option>
+                </select>
+              </div>
+
+              <!-- 2. Major (only the chosen faculty's majors) -->
+              <div>
+                <label for="major-picker" class="flex items-center gap-2 text-xs font-bold mb-1.5"
+                       :class="pendingCollege ? 'text-slate-500' : 'text-slate-300'">
+                  <span class="w-5 h-5 rounded-full text-white text-[10px] flex items-center justify-center"
+                        :class="pendingCollege ? 'bg-emerald-600' : 'bg-slate-300'">2</span>
+                  {{ isRTL ? 'اختر التخصص' : 'Choose Major' }}
+                </label>
+                <select id="major-picker" v-model="pendingMajor" :disabled="!pendingCollege"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-emerald-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                  <option value="" disabled>{{ isRTL ? 'اختر التخصص...' : 'Select a major...' }}</option>
+                  <option v-for="m in majorsOfCollege" :key="m.id" :value="m.id">
+                    {{ isRTL ? m.nameAr : m.nameEn }} ({{ m.totalHours }} {{ isRTL ? 'ساعة' : 'hrs' }})
+                  </option>
+                </select>
+              </div>
+
+              <button type="button" @click="selectMajor(pendingMajor)" :disabled="!pendingMajor"
+                      class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition-colors shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+                <span>{{ isRTL ? 'متابعة إلى المخطط' : 'Continue to Planner' }}</span>
+                <lucide-icon :name="isRTL ? 'arrow-left' : 'arrow-right'" class="h-4 w-4"></lucide-icon>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </main>
+
+      <!-- Footer credit bar -->
+      <footer class="bg-white border-t border-slate-100 mt-12 py-6 text-center text-xs text-slate-400 font-semibold font-sans space-y-1">
+        <p>© 2026 {{ isRTL ? 'جامعة مؤتة - البوابة التفاعلية المتطورة لمختلف التخصصات' : 'Mutah University - Interactive Degree Audit Pacing Hub' }}</p>
+        <p class="text-[11px] text-slate-400">
+          {{ isRTL ? 'تطوير' : 'Developed by' }} <span class="font-extrabold text-slate-600">Amro Azzam</span>
+        </p>
+        <p class="text-[11px]">
+          <a href="mailto:azzamamro787@gmail.com" dir="ltr" class="inline-flex items-center gap-1 text-emerald-700 hover:underline">
+            <lucide-icon name="mail" class="h-3 w-3"></lucide-icon>
+            azzamamro787@gmail.com
+          </a>
+        </p>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- ===== Saif chat widget (outside #app so Vue never touches it) ===== -->
+<div class="saif" id="saif" dir="rtl">
+
+  <section class="saif-panel" id="saif-panel" role="dialog" aria-label="محادثة مع سيف" aria-hidden="true">
+    <header class="saif-head">
+      <div class="saif-avatar" aria-hidden="true">
+        <!-- أيقونة مساعد ذكي: وجه روبوت بسيط مع شرارة -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="8" width="16" height="11" rx="4"/>
+          <path d="M12 8V5"/><circle cx="12" cy="4" r="1" fill="currentColor"/>
+          <circle cx="9" cy="13.5" r="1" fill="currentColor"/><circle cx="15" cy="13.5" r="1" fill="currentColor"/>
+          <path d="M9.5 16.5c1.4.8 3.6.8 5 0"/>
+        </svg>
+      </div>
+      <div>
+        <div class="saif-name">سيف <small>Saif</small></div>
+        <div class="saif-status">مساعدك الذكي</div>
+      </div>
+      <button class="saif-x" type="button" id="saif-x" aria-label="إغلاق المحادثة">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+
+    <div class="saif-log" id="saif-log" role="log" aria-live="polite">
+      <div class="saif-msg bot">أهلاً! أنا سيف. أجيبك من بيانات الموقع: التخصصات والمواد وساعاتها وسنة وفصل تنزيلها.</div>
+      <div class="saif-chips" id="saif-chips">
+        <button type="button" data-q="ما هي الكليات؟">ما هي الكليات؟</button>
+        <button type="button" data-q="تخصصات الهندسة">تخصصات الهندسة</button>
+        <button type="button" data-q="مواد السنة الأولى الفصل الأول">مواد السنة الأولى</button>
+        <button type="button" data-q="كم ساعة أنجزت؟">كم أنجزت؟</button>
+      </div>
+    </div>
+
+    <form class="saif-form" id="saif-form" autocomplete="off">
+      <input class="saif-input" id="saif-input" type="text" placeholder="اكتب رسالتك..." aria-label="رسالتك" maxlength="500">
+      <button class="saif-send" id="saif-send" type="submit" aria-label="إرسال" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </button>
+    </form>
+  </section>
+
+  <button class="saif-bubble" id="saif-bubble" type="button" aria-label="فتح المحادثة مع سيف" aria-expanded="false" aria-controls="saif-panel">
+    <svg class="saif-ico-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/><path d="M9 11h.01M12 11h.01M15 11h.01" stroke-width="2.6"/></svg>
+    <svg class="saif-ico-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+</div>
+
+<script>
+/* ===== سيف: محرّك الإجابة من بيانات الموقع (MAJORS_DATA) ===== */
+var SaifBrain = (function () {
+  'use strict';
+  var MAJOR_KEY = 'mutah_selected_major_v1', DONE_KEY = 'stand_univ_completed_v3';
+  var TYPE_AR = {
+    compulsory_univ: 'متطلب جامعة إجباري', elective_univ: 'متطلب جامعة اختياري',
+    compulsory_college: 'متطلب كلية إجباري', elective_college: 'متطلب كلية اختياري',
+    compulsory_major: 'متطلب تخصص إجباري', elective_major: 'متطلب تخصص اختياري',
+    practical: 'مساق عملي / مختبر'
+  };
+  var MANUAL = {
+    pharmacy: ['صيدلة'], sports_training: ['تدريب رياضي'], sports_rehabilitation: ['تأهيل رياضي'], law: ['حقوق'],
+    computer_engineering: ['هندسة حاسوب', 'هندسة الحاسوب', 'كمبيوتر'], industrial_eng: ['هندسة صناعية'],
+    arch_eng: ['هندسة معمارية', 'معمارية', 'عمارة'], electrical_eng: ['هندسة كهربائية', 'كهربائية', 'كهرباء'],
+    chemical_eng: ['هندسة كيميائية', 'كيميائية'], mechanical_eng: ['هندسة ميكانيكية', 'ميكانيكية'], nursing: ['تمريض'],
+    plant_production: ['إنتاج نباتي'], animal_production: ['إنتاج حيواني'], arabic_lang: ['لغة عربية'],
+    english_lang: ['لغة إنجليزية', 'إنجليزي'], history: ['تاريخ']
+  };
+  var COLLEGE_EXTRA = {
+    'Faculty of Engineering': ['هندسة', 'engineering'], 'Faculty of Sports Sciences': ['علوم رياضية', 'رياضة', 'رياضية', 'sports'],
+    'Faculty of Pharmacy': ['صيدلة', 'pharmacy'], 'Faculty of Law': ['حقوق', 'law'], 'Faculty of Nursing': ['تمريض', 'nursing'],
+    'Faculty of Agriculture': ['زراعة', 'agriculture'], 'Faculty of Arts': ['آداب', 'arts']
+  };
+  var STOP = {};
+  ('كم ما ماذا ماهي ماهو هل في من علي الي عن هي هو هذا هذه اي شو ايش وين متي كيف لماذا او مع عند بدي اريد ابي عندي لي انا ' +
+   'ممكن لو سمحت ساعه ساعات ماده مواد مساق مساقات تخصص كليه سنه فصل رمز كود نوع تنزيل تنزل بنزل بتنزل تدرس يدرس اسم معلومات ' +
+   'تفاصيل عدد خطه جدول قل اخبرني اعطني وضح موقع سيف يا').split(' ').forEach(function (w) { STOP[w] = 1; });
+
+  var ORD = { 'اول': 1, 'اولي': 1, 'اولا': 1, '1': 1, 'ثاني': 2, 'ثانيه': 2, '2': 2, 'ثالث': 3, 'ثالثه': 3, '3': 3, 'رابع': 4, 'رابعه': 4, '4': 4, 'خامس': 5, 'خامسه': 5, '5': 5 };
+  var SEM = { 'اول': 'first', 'اولي': 'first', '1': 'first', 'ثاني': 'second', 'ثانيه': 'second', '2': 'second', 'صيفي': 'summer', 'صيفيه': 'summer' };
+
+  function norm(s) {
+    return String(s || '').toLowerCase()
+      .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+      .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
+      .replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); })
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function stem(t) { return t.replace(/^[وبلكف]?ال(?=.{2})/, ''); }
+  function toks(s) { var n = norm(s); return n ? n.split(' ').map(stem) : []; }
+  function mawad(n) { return n === 1 ? 'مادة واحدة' : n === 2 ? 'مادتان' : n + (n > 10 ? ' مادة' : ' مواد'); }
+  function years(n) { return n === 1 ? 'سنة واحدة' : n === 2 ? 'سنتان' : n + (n > 10 ? ' سنة' : ' سنوات'); }
+  function otherM(n) { return n === 1 ? 'تخصص آخر' : n === 2 ? 'تخصصان آخران' : n + (n > 10 ? ' تخصصاً آخر' : ' تخصصات أخرى'); }
+  function hrs(n) { return n === 1 ? 'ساعة واحدة' : n === 2 ? 'ساعتان' : n + (n > 10 ? ' ساعة' : ' ساعات'); }
+
+  var DB = null;
+  function build() {
+    if (DB) return DB;
+    var majors = (typeof MAJORS_DATA !== 'undefined') ? MAJORS_DATA : [], courses = [], mAl = [], colleges = [], seen = {};
+    majors.forEach(function (m) {
+      m.years.forEach(function (y) {
+        var sems = (y.semesters && y.semesters.length) ? y.semesters : [{ semesterId: null, nameAr: '', courses: y.courses || [] }];
+        sems.forEach(function (s) {
+          (s.courses || []).forEach(function (c) {
+            var nn = norm(c.name);
+            courses.push({ c: c, m: m, y: y, s: s, norm: nn, digits: nn.match(/\d+/g) || [],
+              tk: toks(c.name).filter(function (t) { return !/^\d+$/.test(t); }) });
+          });
+        });
+      });
+      var al = [toks(m.nameAr).filter(function (t) { return t !== 'كليه'; }).join(' '), toks(m.nameEn).join(' ')]
+        .concat((MANUAL[m.id] || []).map(function (a) { return toks(a).join(' '); }));
+      al.forEach(function (a) { if (a) mAl.push({ a: a, id: m.id }); });
+      if (!seen[m.collegeEn]) {
+        seen[m.collegeEn] = 1;
+        colleges.push({ en: m.collegeEn, ar: m.collegeAr, al: [toks(m.collegeAr).filter(function (t) { return t !== 'كليه'; }).join(' ')]
+          .concat((COLLEGE_EXTRA[m.collegeEn] || []).map(function (a) { return toks(a).join(' '); })) });
+      }
+    });
+    mAl.sort(function (x, y) { return y.a.length - x.a.length; });
+    DB = { majors: majors, courses: courses, mAl: mAl, colleges: colleges };
+    return DB;
+  }
+  function majorById(id) { return DB.majors.filter(function (m) { return m.id === id; })[0] || null; }
+  function currentMajorId() {
+    try { var id = localStorage.getItem(MAJOR_KEY); return majorById(id) ? id : null; } catch (e) { return null; }
+  }
+  function findMajor(qs) {
+    for (var i = 0; i < DB.mAl.length; i++) if (qs.indexOf(' ' + DB.mAl[i].a + ' ') >= 0) return { id: DB.mAl[i].id, a: DB.mAl[i].a };
+    return null;
+  }
+  function findCollege(qs) {
+    var best = null;
+    DB.colleges.forEach(function (c) { c.al.forEach(function (a) {
+      if (a && qs.indexOf(' ' + a + ' ') >= 0 && (!best || a.length > best.a.length)) best = { c: c, a: a };
+    }); });
+    return best ? best.c : null;
+  }
+  function parseYear(qn) {
+    var m = qn.match(/(?:^|\s)(?:ال)?سنه\s+(?:ال)?(\S+)/);
+    if (m && ORD[m[1]]) return { n: ORD[m[1]], raw: m[0] };
+    m = qn.match(/(?:^|\s)(?:ال)?(\S+)\s+سنه(?=\s|$)/);
+    if (m && ORD[m[1]]) return { n: ORD[m[1]], raw: m[0] };
+    return null;
+  }
+  function parseSem(qn) {
+    var m = qn.match(/(?:^|\s)(?:ال)?فصل\s+(?:ال)?(\S+)/);
+    if (m && SEM[m[1]]) return { id: SEM[m[1]], raw: m[0] };
+    m = qn.match(/(?:^|\s)(?:ال)?(صيفي|صيفيه)(?=\s|$)/);
+    if (m) return { id: 'summer', raw: m[0] };
+    return null;
+  }
+  function typeFilter(qn) {
+    if (/عملي|مختبر/.test(qn)) return function (t) { return t === 'practical'; };
+    if (/اختياري/.test(qn)) return function (t) { return /^elective/.test(t); };
+    if (/اجباري/.test(qn)) return function (t) { return /^compulsory/.test(t); };
+    if (/متطلبات? جامعه/.test(qn)) return function (t) { return /_univ$/.test(t); };
+    if (/متطلبات? كليه/.test(qn)) return function (t) { return /_college$/.test(t); };
+    if (/متطلبات? تخصص/.test(qn)) return function (t) { return /_major$/.test(t); };
+    return null;
+  }
+  function tokMatch(t, c) { return c === t || (t.length >= 4 && c.length >= 4 && (c.indexOf(t) === 0 || t.indexOf(c) === 0)); }
+
+  function groupBy(entries) {
+    var g = {}, order = [];
+    entries.forEach(function (e) { if (!g[e.norm]) { g[e.norm] = []; order.push(e.norm); } g[e.norm].push(e); });
+    return order.map(function (k) { return g[k]; });
+  }
+  function place(e) { return e.y.nameAr + (e.s.nameAr ? ' – ' + e.s.nameAr : ''); }
+
+  // يفضّل المجموعات الموجودة في تخصص السياق إن وُجدت
+  function prefer(gs, scopeId) {
+    if (!scopeId) return gs;
+    var inS = gs.filter(function (g) { return g.some(function (e) { return e.m.id === scopeId; }); });
+    return inS.length ? inS : gs;
+  }
+  function courseInfo(group, scopeId, ord) {
+    var inScope = scopeId ? group.filter(function (e) { return e.m.id === scopeId; }) : [];
+    var f = inScope[0] || group[0], c = f.c, seg = {}, lines = ['«' + c.name + '»'];
+    if (c.code) seg.code = 'الرمز: ' + c.code;
+    seg.credits = 'الساعات: ' + hrs(c.credits);
+    seg.type = 'النوع: ' + (TYPE_AR[c.type] || 'مادة تخصص');
+    if (inScope.length) {
+      var others = group.length - inScope.length;
+      seg.place = 'تُدرَّس في ' + f.m.nameAr + ': ' + inScope.map(place).join(' / ') + (others ? ' (وتظهر أيضاً في ' + otherM(others) + ')' : '');
+    } else {
+      var seenM = {}, rows = [];
+      group.forEach(function (e) { if (!seenM[e.m.id]) { seenM[e.m.id] = 1; rows.push('• ' + e.m.nameAr + ': ' + place(e)); } });
+      seg.place = 'مكان تنزيلها:\n' + rows.slice(0, 6).join('\n') + (rows.length > 6 ? '\n• و' + otherM(rows.length - 6) : '');
+    }
+    ord.forEach(function (k) { if (seg[k]) lines.push(seg[k]); });
+    return lines.join('\n');
+  }
+
+  function listSemester(m, y, s, tf) {
+    var cs = (s.courses || []).filter(function (c) { return !tf || tf(c.type); });
+    if (!cs.length) return null;
+    var sum = cs.reduce(function (a, c) { return a + c.credits; }, 0);
+    return (s.nameAr ? s.nameAr + ' ' : '') + '(' + mawad(cs.length) + '، ' + hrs(sum) + '):\n' +
+      cs.map(function (c) { return '• ' + c.name + (c.code ? ' [' + c.code + ']' : '') + ' — ' + hrs(c.credits); }).join('\n');
+  }
+  function semsOf(y) { return (y.semesters && y.semesters.length) ? y.semesters : [{ semesterId: null, nameAr: '', courses: y.courses || [] }]; }
+
+  function listCourses(m, yr, sm, tf) {
+    var out = [], years = m.years.filter(function (y) { return !yr || y.yearId === yr.n; });
+    if (yr && !years.length) return 'تخصص ' + m.nameAr + ' لا يحتوي على السنة المطلوبة. عدد سنواته ' + m.years.length + '.';
+    years.forEach(function (y) {
+      var parts = [];
+      semsOf(y).filter(function (s) { return !sm || s.semesterId === sm.id; }).forEach(function (s) {
+        var t = listSemester(m, y, s, tf); if (t) parts.push(t);
+      });
+      if (parts.length) out.push(y.nameAr + ' — ' + parts.join('\n\n'));
+    });
+    if (!out.length) return 'لا توجد مواد مطابقة في خطة ' + m.nameAr + '.';
+    return 'خطة ' + m.nameAr + ':\n\n' + out.join('\n\n');
+  }
+  function yearOverview(m) {
+    return 'خطة ' + m.nameAr + ' (' + m.totalHours + ' ساعة للتخرج):\n' + m.years.map(function (y) {
+      var n = 0, h = 0; semsOf(y).forEach(function (s) { (s.courses || []).forEach(function (c) { n++; h += c.credits; }); });
+      return '• ' + y.nameAr + ': ' + mawad(n) + '، ' + hrs(h);
+    }).join('\n') + '\n\nاكتب السنة والفصل لأعرض المواد، مثل: «مواد السنة الأولى الفصل الثاني».';
+  }
+  function summary(m) {
+    var n = 0, h = 0;
+    m.years.forEach(function (y) { semsOf(y).forEach(function (s) { (s.courses || []).forEach(function (c) { n++; h += c.credits; }); }); });
+    return (m.nameAr === m.collegeAr ? m.nameAr : m.nameAr + ' — ' + m.collegeAr) + '\n• ساعات التخرج: ' + m.totalHours + ' ساعة معتمدة\n• مدة الخطة: ' + years(m.years.length) + '\n• المواد المدرجة: ' + mawad(n) + ' (' + hrs(h) + ')\n\nاسألني عن مواد سنة أو فصل معيّن، أو عن أي مادة بالاسم.';
+  }
+  function progress(m) {
+    var done = [];
+    try { done = (JSON.parse(localStorage.getItem(DONE_KEY) || '{}')[m.id]) || []; } catch (e) {}
+    if (!done.length) return 'لم تسجّل أي مادة منجزة في ' + m.nameAr + ' بعد. علّم موادك بزر «تم اجتيازها» في المخطط وسأحسب تقدمك.';
+    var h = 0, n = 0;
+    DB.courses.forEach(function (e) { if (e.m.id === m.id && done.indexOf(e.c.id) >= 0) { h += e.c.credits; n++; } });
+    var left = Math.max(0, m.totalHours - h);
+    return 'تقدمك في ' + m.nameAr + ':\n• المنجز: ' + h + ' من ' + m.totalHours + ' ساعة (' + Math.min(100, Math.round(h / m.totalHours * 100)) + '%)\n• المواد المنجزة: ' + n + '\n• المتبقي: ' + left + ' ساعة';
+  }
+  function collegesText() {
+    return 'كليات الجامعة في هذا الموقع:\n' + DB.colleges.map(function (c) {
+      var k = DB.majors.filter(function (m) { return m.collegeEn === c.en; }).length;
+      return '• ' + c.ar + ' (' + k + (k === 1 ? ' تخصص' : ' تخصصات') + ')';
+    }).join('\n');
+  }
+  function majorsOf(c) {
+    return c.ar + ' — التخصصات:\n' + DB.majors.filter(function (m) { return m.collegeEn === c.en; })
+      .map(function (m) { return '• ' + m.nameAr + ' (' + m.totalHours + ' ساعة)'; }).join('\n') + '\n\nاذكر اسم التخصص لأعرض خطته.';
+  }
+  function allMajorsText() {
+    return DB.colleges.map(function (c) {
+      return c.ar + ':\n' + DB.majors.filter(function (m) { return m.collegeEn === c.en; }).map(function (m) { return '• ' + m.nameAr; }).join('\n');
+    }).join('\n\n');
+  }
+  var HELP = 'أجيب من بيانات الموقع نفسها: الكليات والتخصصات والمواد وساعاتها وسنة وفصل تنزيلها. جرّب مثلاً:\n• ما هي الكليات؟\n• تخصصات الهندسة\n• مواد السنة الأولى الفصل الثاني\n• ساعات تفاضل وتكامل ومتى تُدرَّس\n• كم ساعة أنجزت؟';
+
+  function answer(text) {
+    build();
+    if (!DB.majors.length) return 'بيانات التخصصات غير متوفرة في هذه الصفحة.';
+    var qn = norm(text);
+    if (!qn) return HELP;
+    var qt = qn.split(' ');
+    if (qt.length <= 3 && /^(مرحبا|اهلا|هلا|سلام|السلام|صباح|مساء|هاي|hi|hello)/.test(qn)) return 'أهلاً بك! اسألني عن التخصصات والمواد وساعاتها وسنة تنزيلها.';
+    if (/شكرا|مشكور|يعطيك العافيه|تسلم/.test(qn)) return 'عفواً! إن احتجت أي معلومة أخرى عن الخطط الدراسية فأنا هنا.';
+    if (/مساعده|شو بتعرف|ايش بتعرف|ماذا تعرف|ماذا تستطيع|كيف استخدمك|شو بتقدر|ماذا تفعل/.test(qn)) return HELP;
+
+    var yr = parseYear(qn), sm = parseSem(qn), clean = qn;
+    if (yr) clean = clean.replace(yr.raw, ' ');
+    if (sm) clean = clean.replace(sm.raw, ' ');
+    var ct = clean.split(' ').filter(Boolean).map(stem), qs = ' ' + ct.join(' ') + ' ';
+    var mHit = findMajor(qs), cHit = mHit ? null : findCollege(qs), cur = currentMajorId();
+    if (cHit) {
+      var ms = DB.majors.filter(function (m) { return m.collegeEn === cHit.en; });
+      if (ms.length === 1) { mHit = { id: ms[0].id, a: '' }; cHit = null; }
+    }
+    var scopeId = mHit ? mHit.id : cur, scope = scopeId ? majorById(scopeId) : null;
+    var tf = typeFilter(qn), nums = (clean.match(/\d+/g) || []);
+    var order = /متي|اي سنه|اي فصل|تنزيل|تنزل|بنزل|بتنزل|تدرس|موعد|وقت/.test(qn) ? ['place', 'credits', 'code', 'type'] :
+      /رمز|كود/.test(qn) ? ['code', 'credits', 'place', 'type'] : /نوع|اجباري|اختياري/.test(qn) ? ['type', 'credits', 'place', 'code'] : ['credits', 'place', 'code', 'type'];
+
+    // 1) التقدم
+    if (/انجزت|انجازي|تقدمي|نجحت|اجتزت|متبقي|باقي علي|كم باقي/.test(qn)) {
+      return scope ? progress(scope) : 'اختر تخصصك أولاً من الموقع (أو اذكره في سؤالك) لأحسب تقدمك.';
+    }
+    // 2) البحث برمز المادة
+    var code = qn.match(/\b\d{7}\b/);
+    if (code) {
+      var byCode = DB.courses.filter(function (e) { return e.c.code === code[0]; });
+      if (byCode.length) return courseInfo(byCode, scopeId, order);
+      return 'لا توجد مادة بالرمز ' + code[0] + ' في بيانات الموقع.';
+    }
+    // 3) مطابقة كاملة لاسم مادة
+    // إذا كانت كلمات التخصص جزءاً من اسم المادة نفسها فلا نعتبرها طلباً لتخصص
+    function cScope(e) { return (mHit && mHit.a && !mHit.a.split(' ').every(function (t) { return e.tk.indexOf(t) >= 0; })) ? mHit.id : cur; }
+    var singular = /(^|\s)(ال)?(ماده|مساق)(\s|$)/.test(qn);
+    var qset = {}; ct.forEach(function (t) { qset[t] = 1; });
+    var aTk = mHit && mHit.a ? mHit.a.split(' ') : [];
+    var p1 = DB.courses.filter(function (e) {
+      if (!e.tk.length || !e.tk.every(function (t) { return qset[t]; })) return false;
+      return singular || !aTk.length || !e.tk.every(function (t) { return aTk.indexOf(t) >= 0; });   // «مواد الهندسة الكهربائية» = تخصص وليس مادة
+    });
+    if (p1.length) {
+      var mx = Math.max.apply(null, p1.map(function (e) { return e.tk.length; }));
+      p1 = p1.filter(function (e) { return e.tk.length === mx; });
+      if (nums.length) {
+        var withNum = p1.filter(function (e) { return e.digits.some(function (d) { return nums.indexOf(d) >= 0; }); });
+        if (withNum.length) p1 = withNum;
+      }
+      var gs = prefer(groupBy(p1), cScope(p1[0]));
+      if (gs.length <= 3) return gs.map(function (g) { return courseInfo(g, cScope(g[0]), order); }).join('\n\n');
+    }
+    // 4) الكليات والتخصصات
+    if (!mHit && !cHit && /(^|\s)(ال)?كليات(\s|$)/.test(qn)) return collegesText();
+    if (!mHit && !cHit && /(^|\s)(ال)?تخصصات(\s|$)/.test(qn)) return allMajorsText();
+    if (cHit) return majorsOf(cHit);
+    // 5) قوائم المواد
+    var listW = /(مواد|مساقات|مقررات|خطه|جدول)/.test(qn), allW = /(جميع|كل)\s+(ال)?(مواد|مساقات)/.test(qn);
+    if (yr || sm || tf || allW || (listW && mHit)) {
+      if (!scope) return 'لأي تخصص؟ اختر تخصصك من الموقع أو اذكره في سؤالك.';
+      if (!yr && !sm && !tf && !allW) return yearOverview(scope);
+      return listCourses(scope, yr, sm, tf);
+    }
+    // 6) ملخص التخصص
+    var hoursW = /ساعات|ساعه|معلومات|تفاصيل|عن|تخرج|كم ماده|عدد المواد/.test(qn);
+    if (mHit || (hoursW && /تخصصي|التخصص|تخرج|التخرج|خطتي|الخطه/.test(qn))) {
+      return scope ? summary(scope) : 'اختر تخصصك أولاً من الموقع لأعرض معلوماته.';
+    }
+    // 7) مطابقة جزئية لاسم مادة
+    var cw = ct.filter(function (t) { return t.length >= 3 && !STOP[t] && !/^\d+$/.test(t); });
+    if (cw.length) {
+      var p2 = DB.courses.filter(function (e) { return cw.every(function (t) { return e.tk.some(function (c) { return tokMatch(t, c); }); }); });
+      if (nums.length) { var wn = p2.filter(function (e) { return e.digits.some(function (d) { return nums.indexOf(d) >= 0; }); }); if (wn.length) p2 = wn; }
+      var g2 = groupBy(p2);
+      g2 = prefer(g2, scopeId);
+      if (g2.length && g2.length <= 3) return g2.map(function (g) { return courseInfo(g, scopeId, order); }).join('\n\n');
+      if (g2.length) return 'وجدتُ ' + g2.length + ' مواد مطابقة، حدّد الاسم أكثر:\n' + g2.slice(0, 8).map(function (g) { return '• ' + g[0].c.name; }).join('\n');
+    }
+    return 'لم أجد جواباً لهذا السؤال في بيانات الموقع. أجيب عن الكليات والتخصصات والمواد وساعاتها وسنة وفصل تنزيلها. اكتب «مساعدة» لرؤية أمثلة.';
+  }
+  return { answer: answer };
+})();
+
+(function () {
+  var root   = document.getElementById('saif');
+  var bubble = document.getElementById('saif-bubble');
+  var panel  = document.getElementById('saif-panel');
+  var closeB = document.getElementById('saif-x');
+  var log    = document.getElementById('saif-log');
+  var form   = document.getElementById('saif-form');
+  var input  = document.getElementById('saif-input');
+  var send   = document.getElementById('saif-send');
+  var chips  = document.getElementById('saif-chips');
+
+  /* ---- فتح / إغلاق ---- */
+  function setOpen(open) {
+    root.classList.toggle('is-open', open);
+    bubble.setAttribute('aria-expanded', open);
+    panel.setAttribute('aria-hidden', !open);
+    bubble.setAttribute('aria-label', open ? 'إغلاق المحادثة' : 'فتح المحادثة مع سيف');
+    if (open) setTimeout(function () { input.focus(); }, 220);
+  }
+  bubble.addEventListener('click', function () { setOpen(!root.classList.contains('is-open')); });
+  closeB.addEventListener('click', function () { setOpen(false); bubble.focus(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && root.classList.contains('is-open')) { setOpen(false); bubble.focus(); }
+  });
+
+  /* ---- إضافة رسالة (textContent يمنع حقن HTML) ---- */
+  function addMsg(text, who) {
+    var el = document.createElement('div');
+    el.className = 'saif-msg ' + who;
+    el.textContent = text;
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+    return el;
+  }
+
+  /* ---- مصدر الرد: بيانات الموقع عبر SaifBrain ----
+     لاحقاً يمكنك استبدال هذه الدالة بطلب fetch إلى خادمك (مع إرسال نص السؤال).  */
+  function getReply(text) {
+    return new Promise(function (resolve) {
+      setTimeout(function () { resolve(SaifBrain.answer(text)); }, 450);
+    });
+  }
+
+  /* ---- معالجة سؤال ---- */
+  function ask(text) {
+    text = (text || '').trim();
+    if (!text) return;
+    if (chips) { chips.remove(); chips = null; }
+    addMsg(text, 'user');
+    input.value = '';
+    send.disabled = true;
+
+    var typing = addMsg('', 'bot');
+    typing.classList.add('saif-typing');
+    typing.innerHTML = '<i></i><i></i><i></i>';
+
+    getReply(text).then(function (reply) {
+      typing.classList.remove('saif-typing');
+      typing.textContent = reply;
+    }).catch(function () {
+      typing.classList.remove('saif-typing');
+      typing.textContent = 'تعذّر جلب الإجابة. حاول مرة أخرى.';
+    }).then(function () { log.scrollTop = log.scrollHeight; });
+  }
+
+  input.addEventListener('input', function () { send.disabled = !input.value.trim(); });
+  form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); });
+  if (chips) chips.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-q]'); if (b) ask(b.getAttribute('data-q'));
+  });
+})();
+</script>
+
+  <!-- Vue 3 Global Build -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+  <script>
+    // Embedded Major Records from local server data
+    const MAJORS_DATA = [{"id":"pharmacy","nameAr":"كلية الصيدلة","nameEn":"Pharmacy","collegeAr":"كلية الصيدلة","collegeEn":"Faculty of Pharmacy","totalHours":163,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-1","name":"علوم حياتية عامة (1)","credits":3,"type":"compulsory_college"},{"id":"course-2","name":"كيمياء عامة (1)","credits":3,"type":"compulsory_college"},{"id":"course-3","name":"كيمياء عامة عملية (1)","credits":1,"type":"practical"},{"id":"course-4","name":"رياضيات وإحصاء لطلبة الصيدلة","credits":3,"type":"compulsory_major"},{"id":"course-5","name":"متطلب جامعة إجباري","credits":3,"type":"compulsory_univ"},{"id":"course-6","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-7","name":"كيمياء عضوية صيدلانية (1)","credits":3,"type":"compulsory_major"},{"id":"course-8","name":"كيمياء تحليلية صيدلانية","credits":3,"type":"compulsory_major"},{"id":"course-9","name":"كيمياء تحليلية صيدلانية عملية","credits":1,"type":"practical"},{"id":"course-10","name":"تشريح وأنسجة","credits":3,"type":"compulsory_college"},{"id":"course-11","name":"فيزياء حيوية صيدلانية","credits":3,"type":"compulsory_major"},{"id":"course-12","name":"متطلب جامعة إجباري","credits":3,"type":"compulsory_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-13","name":"كيمياء عضوية صيدلانية (2)","credits":3,"type":"compulsory_major"},{"id":"course-14","name":"كيمياء عضوية صيدلانية عملية","credits":1,"type":"practical"},{"id":"course-15","name":"صيدلانيات (1)","credits":3,"type":"compulsory_major"},{"id":"course-16","name":"علم وظائف الأعضاء (1)","credits":3,"type":"compulsory_college"},{"id":"course-17","name":"كيمياء حيوية صيدلانية","credits":1,"type":"compulsory_major"},{"id":"course-18","name":"كيمياء حيوية صيدلانية عملية","credits":1,"type":"practical"},{"id":"course-19","name":"متطلب جامعة إجباري","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-20","name":"صيدلانيات (2)","credits":3,"type":"compulsory_major"},{"id":"course-21","name":"صيدلانيات عملية (1)","credits":1,"type":"practical"},{"id":"course-22","name":"علم وظائف الأعضاء (2)","credits":3,"type":"compulsory_college"},{"id":"course-23","name":"علم وظائف الأعضاء عملي","credits":1,"type":"practical"},{"id":"course-24","name":"أحياء دقيقة صيدلانية (1)","credits":3,"type":"compulsory_major"},{"id":"course-25","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"},{"id":"course-26","name":"متطلب كلية اختياري","credits":3,"type":"elective_college"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-27","name":"صيدلانيات (3)","credits":3,"type":"compulsory_major"},{"id":"course-28","name":"صيدلة فيزيائية","credits":3,"type":"compulsory_major"},{"id":"course-29","name":"أحياء دقيقة صيدلانية (2)","credits":3,"type":"compulsory_major"},{"id":"course-30","name":"أحياء دقيقة صيدلانية عملية","credits":1,"type":"practical"},{"id":"course-31","name":"علم الأدوية (1)","credits":3,"type":"compulsory_major"},{"id":"course-32","name":"كيمياء طبية صيدلانية (1)","credits":3,"type":"compulsory_major"},{"id":"course-33","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-34","name":"صيدلة صناعية (1)","credits":3,"type":"compulsory_major"},{"id":"course-35","name":"صيدلانيات عملية (2)","credits":1,"type":"practical"},{"id":"course-36","name":"علم العقاقير","credits":3,"type":"compulsory_major"},{"id":"course-37","name":"علم العقاقير عملي","credits":1,"type":"practical"},{"id":"course-38","name":"علم الأدوية (2)","credits":3,"type":"compulsory_major"},{"id":"course-39","name":"علم الأدوية عملي","credits":1,"type":"practical"},{"id":"course-40","name":"كيمياء طبية صيدلانية (2)","credits":3,"type":"compulsory_major"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-41","name":"صيدلة صناعية (2)","credits":3,"type":"compulsory_major"},{"id":"course-42","name":"صيدلة صناعية عملية","credits":1,"type":"practical"},{"id":"course-43","name":"كيمياء طبية صيدلانية (3)","credits":3,"type":"compulsory_major"},{"id":"course-44","name":"كيمياء طبية صيدلانية عملية","credits":1,"type":"practical"},{"id":"course-45","name":"حركية دواء","credits":3,"type":"compulsory_major"},{"id":"course-46","name":"علم الأدوية (3)","credits":3,"type":"compulsory_major"},{"id":"course-47","name":"كيمياء العقاقير النباتية الطبية","credits":3,"type":"compulsory_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-48","name":"صيدلة سريرية وعلاجات (1)","credits":3,"type":"compulsory_major"},{"id":"course-49","name":"كيمياء العقاقير النباتية الطبية عملية","credits":1,"type":"practical"},{"id":"course-50","name":"رقابة جودة مستحضرات صيدلانية","credits":3,"type":"compulsory_major"},{"id":"course-51","name":"رقابة جودة مستحضرات صيدلانية عملية","credits":1,"type":"practical"},{"id":"course-52","name":"تكنولوجيا الأشكال الصيدلانية المستحدثة","credits":3,"type":"compulsory_major"},{"id":"course-53","name":"تشريعات وأخلاقيات صيدلانية","credits":2,"type":"compulsory_major"},{"id":"course-54","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]}]},{"yearId":5,"nameAr":"السنة الخامسة","nameEn":"Fifth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-55","name":"صيدلة سريرية وعلاجات (2)","credits":3,"type":"compulsory_major"},{"id":"course-56","name":"صيدلة سريرية وعلاجات عملية","credits":1,"type":"practical"},{"id":"course-57","name":"صيدلة مستشفيات","credits":3,"type":"compulsory_major"},{"id":"course-58","name":"علم السموم","credits":3,"type":"compulsory_major"},{"id":"course-59","name":"تسويق وإدارة صيدلانية","credits":3,"type":"compulsory_major"},{"id":"course-60","name":"علم الأمراض لطلبة الصيدلة","credits":3,"type":"compulsory_major"},{"id":"course-61","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-62","name":"تدريب ميداني (صيدليات المجتمع)","credits":4,"type":"practical"},{"id":"course-63","name":"تدريب ميداني (صيدليات المستشفيات)","credits":4,"type":"practical"},{"id":"course-64","name":"تدريب ميداني (المصانع والمؤسسات الصيدلانية)","credits":4,"type":"practical"},{"id":"course-65","name":"مشروع تخرج أو بحث صيدلاني","credits":3,"type":"compulsory_major"}]}]}]},{"id":"sports_training","nameAr":"التدريب الرياضي","nameEn":"Sports Training","collegeAr":"كلية العلوم الرياضية","collegeEn":"Faculty of Sports Sciences","totalHours":133,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-66","name":"مبادئ التدريب الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-67","name":"تشريح ورت لجانب التدريب الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-68","name":"علم الحركة الرياضية","credits":3,"type":"compulsory_major"},{"id":"course-69","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-70","name":"فسيولوجيا الجهد البدني للتدريب","credits":3,"type":"compulsory_major"},{"id":"course-71","name":"الإعداد النفسي الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-72","name":"الأسس الحركية والتدريبية","credits":3,"type":"compulsory_major"},{"id":"course-73","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"course-74","name":"تنظيم وإدارة البطولات الرياضية","credits":3,"type":"compulsory_major"},{"id":"course-75","name":"الانتقاء الرياضي وتصنيف اللاعبين","credits":3,"type":"compulsory_major"},{"id":"course-76","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"مساقات السنة الثانية","nameEn":"Second Year Courses","courses":[{"id":"course-77","name":"تخطيط برامج التدريب الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-78","name":"تدريب الفئات العمرية الناشئة","credits":3,"type":"compulsory_major"},{"id":"course-79","name":"الميكانيكا الحيوية والتحليل الحركي","credits":3,"type":"compulsory_major"},{"id":"course-80","name":"التدريب الميداني والعملي 1","credits":3,"type":"practical"},{"id":"course-81","name":"الاستشفاء الرياضي والتغذية","credits":3,"type":"compulsory_major"},{"id":"course-82","name":"اختبارات ومقاييس التدريب","credits":3,"type":"compulsory_major"},{"id":"course-83","name":"التحكيم الرياضي وقوانين الألعاب","credits":3,"type":"compulsory_major"},{"id":"course-84","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"مساقات السنة الثالثة","nameEn":"Third Year Courses","courses":[{"id":"course-85","name":"تدريب المستويات الرياضية العالية","credits":3,"type":"compulsory_major"},{"id":"course-86","name":"الإصابات الرياضية والإسعاف الأولي","credits":3,"type":"compulsory_major"},{"id":"course-87","name":"التدريب الميداني والعملي 2","credits":3,"type":"practical"},{"id":"course-88","name":"اللياقة البدنية والتحضير الخاص","credits":3,"type":"compulsory_major"},{"id":"course-89","name":"التكنولوجيا والتحليل البرمجي في التدريب","credits":3,"type":"compulsory_major"},{"id":"course-90","name":"مناهج البحث العلمي في التدريب","credits":3,"type":"compulsory_major"},{"id":"course-91","name":"مهارات الاتصال الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-92","name":"مساق تخصص اختياري","credits":3,"type":"elective_major"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"مساقات السنة الرابعة","nameEn":"Fourth Year Courses","courses":[{"id":"course-93","name":"إدارة المنشآت والأندية الرياضية","credits":3,"type":"compulsory_major"},{"id":"course-94","name":"الميكانيكا الحيوية المتقدمة","credits":3,"type":"compulsory_major"},{"id":"course-95","name":"التدريب الرياضي التخصصي المقارن","credits":3,"type":"compulsory_major"},{"id":"course-96","name":"سيكولوجية المنافسات والرياضيين","credits":3,"type":"compulsory_major"},{"id":"course-97","name":"مشروع التخرج في التدريب الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-98","name":"التدريب الرياضي والعمل العملي الشامل","credits":4,"type":"practical"},{"id":"course-99","name":"مكافحة المنشطات والوعي الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-100","name":"مساق تخصص اختياري","credits":3,"type":"elective_major"}]}]}]},{"id":"sports_rehabilitation","nameAr":"التأهيل الرياضي","nameEn":"Sports Rehabilitation","collegeAr":"كلية العلوم الرياضية","collegeEn":"Faculty of Sports Sciences","totalHours":133,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-101","name":"مدخل إلى التأهيل الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-102","name":"التشريح الوظيفي للإصابات","credits":3,"type":"compulsory_major"},{"id":"course-103","name":"علم وظائف الأعضاء الحيوي","credits":3,"type":"compulsory_major"},{"id":"course-104","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-105","name":"الميكانيكا الحيوية للتأهيل","credits":3,"type":"compulsory_major"},{"id":"course-106","name":"الإسعافات الأولية والإنقاذ","credits":3,"type":"practical"},{"id":"course-107","name":"مبادئ الرعاية الطبية الرياضية","credits":3,"type":"compulsory_major"},{"id":"course-108","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"course-109","name":"المصطلحات الطبية الرياضية","credits":3,"type":"compulsory_major"},{"id":"course-110","name":"مبادئ وعلم النفس التأهيلي","credits":3,"type":"compulsory_major"},{"id":"course-111","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"مساقات السنة الثانية","nameEn":"Second Year Courses","courses":[{"id":"course-112","name":"التقييم والتشخيص السريري للإصابات","credits":3,"type":"compulsory_major"},{"id":"course-113","name":"إصابات الطرف السفلي","credits":3,"type":"compulsory_major"},{"id":"course-114","name":"إصابات الطرف العلوي","credits":3,"type":"compulsory_major"},{"id":"course-115","name":"وسائل العلاج الفيزيائي والتأهيلي","credits":3,"type":"compulsory_major"},{"id":"course-116","name":"التدريب العملي في عيادات التأهيل 1","credits":3,"type":"practical"},{"id":"course-117","name":"التغذية والتمثيل الغذائي للإصابات","credits":3,"type":"compulsory_major"},{"id":"course-118","name":"الفحص البدني والقوام الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-119","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"مساقات السنة الثالثة","nameEn":"Third Year Courses","courses":[{"id":"course-120","name":"إصابات العمود الفقري والجذع","credits":3,"type":"compulsory_major"},{"id":"course-121","name":"التمارين العلاجية والتأهيلية 1","credits":3,"type":"compulsory_major"},{"id":"course-122","name":"التمارين العلاجية والتأهيلية 2","credits":3,"type":"compulsory_major"},{"id":"course-123","name":"التأهيل المائي والسباحة العلاجية","credits":3,"type":"compulsory_major"},{"id":"course-124","name":"التدريب العملي الميداني للإصابات 2","credits":3,"type":"practical"},{"id":"course-125","name":"العلاج اليدوي والمساج الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-126","name":"مناهج البحث العلمي في التأهيل","credits":3,"type":"compulsory_major"},{"id":"course-127","name":"مساق تخصص اختياري","credits":3,"type":"elective_major"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"مساقات السنة الرابعة","nameEn":"Fourth Year Courses","courses":[{"id":"course-128","name":"تأهيل المستويات الرياضية العالية","credits":3,"type":"compulsory_major"},{"id":"course-129","name":"تأهيل ذوي الاحتياجات الخاصة","credits":3,"type":"compulsory_major"},{"id":"course-130","name":"علم الأدوية الرياضي والمنشطات","credits":3,"type":"compulsory_major"},{"id":"course-131","name":"التدريب السريري والميداني الشامل","credits":4,"type":"practical"},{"id":"course-132","name":"مشروع التخرج في التأهيل الرياضي","credits":3,"type":"compulsory_major"},{"id":"course-133","name":"إدارة المراكز والمختبرات التأهيلية","credits":3,"type":"compulsory_major"},{"id":"course-134","name":"الجودة والسلامة في التأهيل","credits":3,"type":"compulsory_major"},{"id":"course-135","name":"مساق تخصص اختياري","credits":3,"type":"elective_major"}]}]}]},{"id":"law","nameAr":"الحقوق","nameEn":"Law","collegeAr":"كلية الحقوق","collegeEn":"Faculty of Law","totalHours":133,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-136","name":"مبادئ القانون","credits":3,"type":"compulsory_major"},{"id":"course-137","name":"قانون دستوري ونظم سياسية 1","credits":3,"type":"compulsory_major"},{"id":"course-138","name":"متطلب جامعة إجباري","credits":3,"type":"compulsory_univ"},{"id":"course-139","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-140","name":"قانون الأحوال الشخصية / زواج وطلاق","credits":3,"type":"compulsory_major"},{"id":"course-141","name":"مصادر الالتزام 1","credits":3,"type":"compulsory_major"},{"id":"course-142","name":"قانون العقوبات القسم العام","credits":3,"type":"compulsory_major"},{"id":"course-143","name":"مبادئ القانون التجاري","credits":3,"type":"compulsory_major"},{"id":"course-144","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"course-145","name":"القانون الإداري 1","credits":3,"type":"compulsory_major"},{"id":"course-146","name":"القانون الدولي العام","credits":3,"type":"compulsory_major"},{"id":"course-147","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"مساقات السنة الثانية","nameEn":"Second Year Courses","courses":[{"id":"course-148","name":"مسار (1) المصادر الإرادية","credits":3,"type":"compulsory_major"},{"id":"course-149","name":"مسار (2) غير الإرادية","credits":3,"type":"compulsory_major"},{"id":"course-150","name":"شركات وتأمين","credits":3,"type":"compulsory_major"},{"id":"course-151","name":"جرائم الأموال","credits":3,"type":"compulsory_major"},{"id":"course-152","name":"القضاء الدستوري","credits":3,"type":"compulsory_major"},{"id":"course-153","name":"حقوق الإنسان","credits":3,"type":"compulsory_major"},{"id":"course-154","name":"البلديات المحلية","credits":2,"type":"compulsory_major"},{"id":"course-155","name":"الإدارة الإلكترونية","credits":2,"type":"compulsory_major"},{"id":"course-156","name":"مصطلحات قانونية","credits":3,"type":"compulsory_major"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"مساقات السنة الثالثة","nameEn":"Third Year Courses","courses":[{"id":"course-157","name":"مسار أحكام الالتزام","credits":3,"type":"compulsory_major"},{"id":"course-158","name":"العقود المسماة","credits":3,"type":"compulsory_major"},{"id":"course-159","name":"قانون العمل","credits":3,"type":"compulsory_major"},{"id":"course-160","name":"جرائم تكنولوجيا المعلومات","credits":3,"type":"compulsory_major"},{"id":"course-161","name":"أساليب البحث","credits":2,"type":"compulsory_major"},{"id":"course-162","name":"جرائم الأشخاص","credits":3,"type":"compulsory_major"},{"id":"course-163","name":"الأوراق التجارية","credits":3,"type":"compulsory_major"},{"id":"course-164","name":"الملكية الفكرية","credits":3,"type":"compulsory_major"},{"id":"course-165","name":"أصول الفقه","credits":3,"type":"compulsory_major"},{"id":"course-166","name":"عقود التأمين","credits":3,"type":"compulsory_major"},{"id":"course-167","name":"قانون حماية البيئة","credits":2,"type":"compulsory_major"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"مساقات السنة الرابعة","nameEn":"Fourth Year Courses","courses":[{"id":"course-168","name":"أصول محاكمات مدنية","credits":3,"type":"compulsory_major"},{"id":"course-169","name":"البيّنات والتنفيذ","credits":3,"type":"compulsory_major"},{"id":"course-170","name":"أصول محاكمات جزائية 2","credits":3,"type":"compulsory_major"},{"id":"course-171","name":"أصول جزائية 2","credits":3,"type":"compulsory_major"},{"id":"course-172","name":"الدولي الإنساني","credits":3,"type":"compulsory_major"},{"id":"course-173","name":"منظمات دولية وإقليمية","credits":2,"type":"compulsory_major"},{"id":"course-174","name":"المسؤولية الطبية","credits":3,"type":"compulsory_major"},{"id":"course-175","name":"قانون بحري","credits":3,"type":"compulsory_major"},{"id":"course-176","name":"قانون الملكية العقارية","credits":3,"type":"compulsory_major"},{"id":"course-177","name":"جرائم أمن الدولة","credits":2,"type":"compulsory_major"},{"id":"course-178","name":"عقوبات عسكري","credits":2,"type":"compulsory_major"},{"id":"course-179","name":"وصايا ومواريث","credits":3,"type":"compulsory_major"},{"id":"course-180","name":"سيكولوجية تزوير المسندات والتزوير","credits":3,"type":"compulsory_major"},{"id":"course-181","name":"الإجراء والطب","credits":2,"type":"compulsory_major"},{"id":"course-182","name":"التحكيم التجاري","credits":3,"type":"compulsory_major"},{"id":"course-183","name":"الدولي الخاص","credits":3,"type":"compulsory_major"},{"id":"course-184","name":"أصول المحاكمات الشرعية","credits":3,"type":"compulsory_major"}]}]}]},{"id":"computer_engineering","nameAr":"هندسة الحاسوب","nameEn":"Computer Engineering","collegeAr":"كلية الهندسة","collegeEn":"Faculty of Engineering","totalHours":163,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0301101","code":"0301101","name":"تفاضل وتكامل (1)","credits":3,"type":"compulsory_college"},{"id":"c-0302101","code":"0302101","name":"فيزياء عامة (1)","credits":3,"type":"compulsory_college"},{"id":"c-0302111","code":"0302111","name":"فيزياء عامة عملية (1)","credits":1,"type":"practical"},{"id":"c-0303101","code":"0303101","name":"كيمياء عامة (1)","credits":3,"type":"compulsory_college"},{"id":"c-0303105","code":"0303105","name":"كيمياء عامة عملية (1)","credits":1,"type":"practical"},{"id":"c-1801102","code":"1801102","name":"مهارات اللغة العربية","credits":3,"type":"compulsory_univ"},{"id":"c-1802103","code":"1802103","name":"مهارات اللغة الإنجليزية","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0301102","code":"0301102","name":"تفاضل وتكامل (2)","credits":3,"type":"compulsory_college"},{"id":"c-0302102","code":"0302102","name":"فيزياء عامة (2)","credits":3,"type":"compulsory_college"},{"id":"c-0302112","code":"0302112","name":"فيزياء عامة عملية (2)","credits":1,"type":"practical"},{"id":"c-1600106","code":"1600106","name":"التربية الوطنية","credits":3,"type":"compulsory_univ"},{"id":"c-0101173","code":"0101173","name":"العلوم العسكرية","credits":3,"type":"compulsory_univ"},{"id":"c-2100102","code":"2100102","name":"الريادة والابتكار","credits":3,"type":"compulsory_univ"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"c-0809103","code":"0809103","name":"المهارات الحياتية","credits":3,"type":"compulsory_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0301203","code":"0301203","name":"معادلات تفاضلية عادية","credits":3,"type":"compulsory_college"},{"id":"c-0405112","code":"0405112","name":"البرمجة للمهندسين","credits":3,"type":"compulsory_college"},{"id":"c-0405113","code":"0405113","name":"مختبر البرمجة للمهندسين","credits":1,"type":"practical"},{"id":"c-0401211","code":"0401211","name":"دوائر كهربائية (1)","credits":3,"type":"compulsory_major"},{"id":"c-0401212","code":"0401212","name":"دوائر كهربائية (2)","credits":3,"type":"compulsory_major"},{"id":"c-0401219","code":"0401219","name":"مختبر دوائر كهربائية","credits":1,"type":"practical"},{"id":"c-0405213","code":"0405213","name":"رياضيات منفصلة","credits":3,"type":"compulsory_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0401109","code":"0401109","name":"الاحتمالات والإحصاء والطرق العشوائية","credits":3,"type":"compulsory_major"},{"id":"c-0401208","code":"0401208","name":"إشارات وأنظمة","credits":3,"type":"compulsory_major"},{"id":"c-0402307","code":"0402307","name":"تحليلات عددية","credits":3,"type":"compulsory_college"},{"id":"c-0401291","code":"0401291","name":"إلكترونيات لطلبة هندسة الحاسوب","credits":3,"type":"compulsory_major"},{"id":"c-0405271","code":"0405271","name":"تصميم أنظمة رقمية","credits":3,"type":"compulsory_major"},{"id":"c-0405279","code":"0405279","name":"مختبر تصميم أنظمة رقمية","credits":1,"type":"practical"},{"id":"c-0405280","code":"0405280","name":"أنظمة المعالجة الرقمية","credits":3,"type":"compulsory_major"},{"id":"c-0405281","code":"0405281","name":"مختبر أنظمة المعالجات الرقمية","credits":1,"type":"practical"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0405342","code":"0405342","name":"البرمجة الموجهة الشيئية","credits":3,"type":"compulsory_major"},{"id":"c-0405343","code":"0405343","name":"مختبر البرمجة الموجهة الشيئية","credits":1,"type":"practical"},{"id":"c-0403198","code":"0403198","name":"الرسم الهندسي","credits":2,"type":"compulsory_college"},{"id":"c-0404200","code":"0404200","name":"مهارات اتصال","credits":2,"type":"compulsory_univ"},{"id":"c-0401363","code":"0401363","name":"إلكترونيات رقمية","credits":3,"type":"compulsory_major"},{"id":"c-0401368","code":"0401368","name":"مختبر إلكترونيات","credits":1,"type":"practical"},{"id":"c-0405324","code":"0405324","name":"اتصالات ونقل بيانات","credits":3,"type":"compulsory_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0405422","code":"0405422","name":"شبكات الحاسوب","credits":3,"type":"compulsory_major"},{"id":"c-0401300","code":"0401300","name":"أنظمة التحكم الآلي","credits":3,"type":"compulsory_major"},{"id":"c-0405335","code":"0405335","name":"أنظمة تشغيل حاسبات","credits":3,"type":"compulsory_major"},{"id":"c-0405444","code":"0405444","name":"الخوارزميات وتراكيب البيانات","credits":3,"type":"compulsory_major"},{"id":"c-0403301","code":"0403301","name":"الاقتصاد الهندسي","credits":3,"type":"compulsory_college"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0405374","code":"0405374","name":"الأنظمة المضمنة","credits":3,"type":"compulsory_major"},{"id":"c-0405378","code":"0405378","name":"مختبر الأنظمة المضمنة","credits":1,"type":"practical"},{"id":"c-0405483","code":"0405483","name":"معمارية الحاسوب","credits":3,"type":"compulsory_major"},{"id":"c-0405414","code":"0405414","name":"مختبر معمارية الحاسوب","credits":1,"type":"practical"},{"id":"c-0405430","code":"0405430","name":"المحاكاة والنمذجة","credits":3,"type":"compulsory_major"},{"id":"c-0405430b","code":"0405430b","name":"تقييم وتصميم الحاسوب","credits":3,"type":"compulsory_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0405523","code":"0405523","name":"بروتوكولات وبرمجة الشبكات","credits":3,"type":"compulsory_major"},{"id":"c-0405529","code":"0405529","name":"مختبر شبكات الحاسوب","credits":1,"type":"practical"},{"id":"c-0405539","code":"0405539","name":"أمن الحواسيب والشبكات","credits":3,"type":"compulsory_major"},{"id":"c-0403560","code":"0403560","name":"الذكاء الاصطناعي وتعلم الآلة","credits":3,"type":"compulsory_major"},{"id":"c-0405462","code":"0405462","name":"تصميم دوائر التكامل الكبير جداً","credits":3,"type":"compulsory_major"},{"id":"c-0405577","code":"0405577","name":"مختبر تنظيم وتصميم الحاسوب","credits":1,"type":"practical"},{"id":"c-0405593","code":"0405593","name":"مشروع تخرج (1)","credits":1,"type":"compulsory_major"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"c-0405580","code":"0405580","name":"تدريب ميداني كأولى خطوات الاحتراف","credits":6,"type":"practical"}]}]},{"yearId":5,"nameAr":"السنة الخامسة","nameEn":"Fifth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0408817","code":"0408817","name":"الأنظمة الموزعة والمعالجات المتوازية","credits":3,"type":"compulsory_major"},{"id":"c-0408538","code":"0408538","name":"مختبر أمن الحواسيب والشبكات","credits":1,"type":"practical"},{"id":"c-0105550","code":"0105550","name":"أساسيات نظم البيانات","credits":3,"type":"compulsory_major"},{"id":"c-0402110","code":"0402110","name":"مناهل هندسية","credits":3,"type":"compulsory_major"},{"id":"c-3403209","code":"3403209","name":"رسم بالحاسوب","credits":3,"type":"compulsory_major"},{"id":"c-0405501","code":"0405501","name":"تخصص اختياري (1)","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0405594","code":"0405594","name":"مشروع تخرج (2)","credits":3,"type":"compulsory_major"},{"id":"c-0405502","code":"0405502","name":"تخصص اختياري (2)","credits":3,"type":"elective_major"},{"id":"c-0809222","code":"0809222","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"}]}]}]},{"id":"industrial_eng","nameAr":"الهندسة الصناعية","nameEn":"Industrial Engineering","collegeAr":"كلية الهندسة","collegeEn":"Faculty of Engineering","totalHours":163,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0301101","code":"0301101","name":"تفاضل وتكامل 1","credits":3,"type":"compulsory_college"},{"id":"c-0302101","code":"0302101","name":"فيزياء عامة 1","credits":3,"type":"compulsory_college"},{"id":"c-0302111","code":"0302111","name":"فيزياء عامة عملية 1","credits":1,"type":"practical"},{"id":"c-0303101","code":"0303101","name":"كيمياء عامة 1","credits":3,"type":"compulsory_college"},{"id":"c-1801102","code":"1801102","name":"مهارات اللغة العربية","credits":3,"type":"compulsory_univ"},{"id":"c-1802103","code":"1802103","name":"مهارات اللغة الإنجليزية","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0301102","code":"0301102","name":"تفاضل وتكامل 2","credits":3,"type":"compulsory_college"},{"id":"c-0302102","code":"0302102","name":"فيزياء عامة 2","credits":3,"type":"compulsory_college"},{"id":"c-0302112","code":"0302112","name":"فيزياء عامة عملية 2","credits":1,"type":"practical"},{"id":"c-0403198","code":"0403198","name":"الرسم الهندسي","credits":2,"type":"compulsory_college"},{"id":"c-0402110","code":"0402110","name":"مشاعل هندسية","credits":1,"type":"compulsory_college"},{"id":"c-1600106","code":"1600106","name":"التربية الوطنية","credits":3,"type":"compulsory_univ"},{"id":"c-0101173","code":"0101173","name":"العلوم العسكرية","credits":3,"type":"compulsory_univ"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"c-2100102","code":"2100102","name":"الريادة والابتكار","credits":3,"type":"compulsory_univ"},{"id":"c-0809103","code":"0809103","name":"المهارات الحياتية","credits":3,"type":"compulsory_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0301203","code":"0301203","name":"معادلات تفاضلية عادية 1","credits":3,"type":"compulsory_college"},{"id":"c-0401109","code":"0401109","name":"نظرية الاحتمالات والإحصاء والطرق العشوائية","credits":3,"type":"compulsory_major"},{"id":"c-0405112","code":"0405112","name":"البرمجة للمهندسين","credits":3,"type":"compulsory_college"},{"id":"c-0403200","code":"0403200","name":"استاتيكا","credits":3,"type":"compulsory_major"},{"id":"c-0401240","code":"0401240","name":"الدوائر الكهربائية والإلكترونيات","credits":3,"type":"compulsory_major"},{"id":"c-0401219","code":"0401219","name":"مختبر الدوائر الكهربائية","credits":1,"type":"practical"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0402203","code":"0402203","name":"ديناميكا","credits":3,"type":"compulsory_major"},{"id":"c-0402227","code":"0402227","name":"مقاومة مواد","credits":3,"type":"compulsory_major"},{"id":"c-0402228","code":"0402228","name":"مختبر مقاومة مواد","credits":1,"type":"practical"},{"id":"c-0406220","code":"0406220","name":"علم المواد الهندسية","credits":3,"type":"compulsory_major"},{"id":"c-0406224","code":"0406224","name":"مختبر المواد الهندسية","credits":1,"type":"practical"},{"id":"c-0404200","code":"0404200","name":"مهارات الاتصال","credits":2,"type":"compulsory_univ"},{"id":"c-0406211","code":"0406211","name":"أساسيات هندسة النظم","credits":3,"type":"compulsory_major"},{"id":"c-0403209","code":"0403209","name":"رسم هندسي بالحاسوب","credits":2,"type":"practical"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0406320","code":"0406320","name":"بحوث عمليات 1","credits":3,"type":"compulsory_major"},{"id":"c-0406330","code":"0406330","name":"تصميم وتحليل النظم الصناعية","credits":3,"type":"compulsory_major"},{"id":"c-0406420","code":"0406420","name":"عمليات التصنيع","credits":3,"type":"compulsory_major"},{"id":"c-0406424","code":"0406424","name":"مختبر عمليات التصنيع","credits":1,"type":"practical"},{"id":"c-0403240","code":"0403240","name":"الموائع والعلوم الحرارية","credits":3,"type":"compulsory_major"},{"id":"c-0406212","code":"0406212","name":"العوامل البشرية وعلوم العمل","credits":3,"type":"compulsory_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0401360","code":"0401360","name":"تحكم صناعي","credits":3,"type":"compulsory_major"},{"id":"c-0401363","code":"0401363","name":"مختبر تحكم صناعي","credits":1,"type":"practical"},{"id":"c-0406331","code":"0406331","name":"تخطيط الإنتاج وإدارة المخزون","credits":3,"type":"compulsory_major"},{"id":"c-0403302","code":"0403302","name":"الاقتصاد الهندسي","credits":3,"type":"compulsory_college"},{"id":"c-0402301","code":"0402301","name":"تحليلات عددية","credits":3,"type":"compulsory_college"},{"id":"c-0901231","code":"0901231","name":"متطلب جامعة اختياري (1)","credits":3,"type":"elective_univ"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0406550","code":"0406550","name":"الموثوقية وإدارة الصيانة","credits":3,"type":"compulsory_major"},{"id":"c-0406333","code":"0406333","name":"نمذجة ومحاكاة النظم","credits":3,"type":"compulsory_major"},{"id":"c-0406350","code":"0406350","name":"ضبط الجودة","credits":3,"type":"compulsory_major"},{"id":"c-0406361","code":"0406361","name":"تصميم ميكانيكي","credits":3,"type":"compulsory_major"},{"id":"c-0406344","code":"0406344","name":"أنظمة القياس والأجهزة","credits":3,"type":"compulsory_major"},{"id":"c-0406347","code":"0406347","name":"مختبر أنظمة القياس والأجهزة","credits":1,"type":"practical"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0406551b","code":"0406551b","name":"تطوير المنتج","credits":3,"type":"compulsory_major"},{"id":"c-0406310","code":"0406310","name":"تصميم وتخطيط المنشآت الصناعية","credits":3,"type":"compulsory_major"},{"id":"c-0406541","code":"0406541","name":"التصميم والتصنيع باستخدام الحاسوب","credits":3,"type":"compulsory_major"},{"id":"c-0406570","code":"0406570","name":"اللوجستيات وإدارة سلاسل الإمداد","credits":3,"type":"compulsory_major"},{"id":"c-0406421","code":"0406421","name":"عمليات التصنيع غير التقليدية","credits":3,"type":"compulsory_major"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"c-0406401","code":"0406401","name":"التدريب الميداني الهندسي الصناعي","credits":6,"type":"practical"}]}]},{"yearId":5,"nameAr":"السنة الخامسة","nameEn":"Fifth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0406452","code":"0406452","name":"إدارة الجودة الشاملة","credits":3,"type":"compulsory_major"},{"id":"c-0406500","code":"0406500","name":"مشروع تخرج 1","credits":1,"type":"compulsory_major"},{"id":"c-0406551","code":"0406551","name":"تخصص اختياري (1)","credits":3,"type":"elective_major"},{"id":"c-0406552","code":"0406552","name":"تخصص اختياري (2)","credits":3,"type":"elective_major"},{"id":"c-0901232","code":"0901232","name":"متطلب جامعة اختياري (2)","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0406591","code":"0406591","name":"مشروع تخرج 2","credits":3,"type":"compulsory_major"},{"id":"c-0901233","code":"0901233","name":"متطلب جامعة اختياري (3)","credits":3,"type":"elective_univ"},{"id":"c-0406553","code":"0406553","name":"تخصص اختياري (3)","credits":3,"type":"elective_major"}]}]}]},{"id":"arch_eng","nameAr":"الهندسة المعمارية","nameEn":"Architectural Engineering","collegeAr":"كلية الهندسة","collegeEn":"Faculty of Engineering","totalHours":163,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-185","name":"مدخل إلى التصميم المعماري (1)","credits":4,"type":"compulsory_major"},{"id":"course-186","name":"الرسم الهندسي","credits":2,"type":"compulsory_college"},{"id":"course-187","name":"رسم حر (1)","credits":2,"type":"practical"},{"id":"course-188","name":"تفاضل وتكامل (1)","credits":3,"type":"compulsory_college"},{"id":"course-189","name":"فيزياء عامة (1)","credits":3,"type":"compulsory_college"},{"id":"course-190","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-191","name":"مدخل إلى التصميم المعماري (2)","credits":4,"type":"compulsory_major"},{"id":"course-192","name":"رسم معماري بالحاسوب (1)","credits":2,"type":"practical"},{"id":"course-193","name":"رسم حر (2)","credits":2,"type":"practical"},{"id":"course-194","name":"تفاضل وتكامل (2)","credits":3,"type":"compulsory_college"},{"id":"course-195","name":"جيولوجيا لطلبة الهندسة","credits":3,"type":"compulsory_college"},{"id":"course-196","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-197","name":"تصميم معماري (1)","credits":4,"type":"compulsory_major"},{"id":"course-198","name":"رسم وإظهار معماري","credits":3,"type":"practical"},{"id":"course-199","name":"إنشاء مباني (1)","credits":3,"type":"compulsory_major"},{"id":"course-200","name":"تاريخ عمارة (1)","credits":3,"type":"compulsory_major"},{"id":"course-201","name":"ميكانيكا الإنشاء للعمارة","credits":3,"type":"compulsory_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-202","name":"تصميم معماري (2)","credits":4,"type":"compulsory_major"},{"id":"course-203","name":"رسم معماري بالحاسوب (2)","credits":2,"type":"practical"},{"id":"course-204","name":"إنشاء مباني (2)","credits":3,"type":"compulsory_major"},{"id":"course-205","name":"تاريخ عمارة (2)","credits":3,"type":"compulsory_major"},{"id":"course-206","name":"مشاغل هندسية","credits":1,"type":"compulsory_college"},{"id":"course-207","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-208","name":"تصميم معماري (3)","credits":4,"type":"compulsory_major"},{"id":"course-209","name":"عمارة إنسانية","credits":3,"type":"compulsory_major"},{"id":"course-210","name":"الرسومات التنفيذية","credits":3,"type":"practical"},{"id":"course-211","name":"العمارة الإسلامية","credits":3,"type":"compulsory_major"},{"id":"course-212","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-213","name":"تصميم معماري (4)","credits":4,"type":"compulsory_major"},{"id":"course-214","name":"المساحة للعمارة","credits":3,"type":"compulsory_major"},{"id":"course-215","name":"تشريعات مباني","credits":2,"type":"compulsory_major"},{"id":"course-216","name":"العمارة الحديثة","credits":3,"type":"compulsory_major"},{"id":"course-217","name":"مهارات اتصال","credits":2,"type":"compulsory_univ"},{"id":"course-218","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-219","name":"تصميم معماري (5)","credits":4,"type":"compulsory_major"},{"id":"course-220","name":"تخطيط حضري","credits":3,"type":"compulsory_major"},{"id":"course-221","name":"مواصفات وحساب كميات","credits":3,"type":"compulsory_major"},{"id":"course-222","name":"التحكم البيئي","credits":3,"type":"compulsory_major"},{"id":"course-223","name":"اقتصاد هندسي","credits":3,"type":"compulsory_college"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-224","name":"تصميم معماري (6)","credits":4,"type":"compulsory_major"},{"id":"course-225","name":"هندسة وتنسيق المواقع","credits":3,"type":"compulsory_major"},{"id":"course-226","name":"إدارة المشاريع","credits":3,"type":"compulsory_major"},{"id":"course-227","name":"الأبنية الخضراء","credits":3,"type":"compulsory_major"},{"id":"course-228","name":"متطلب قسم اختياري","credits":3,"type":"elective_major"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"course-229","name":"تدريب ميداني معماري","credits":6,"type":"practical"}]}]},{"yearId":5,"nameAr":"السنة الخامسة","nameEn":"Fifth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-230","name":"مشروع تخرج (1)","credits":2,"type":"compulsory_major"},{"id":"course-231","name":"متطلب قسم اختياري","credits":3,"type":"elective_major"},{"id":"course-232","name":"نمذجة معلومات البناء","credits":3,"type":"compulsory_major"},{"id":"course-233","name":"نقد وتحليل معماري","credits":3,"type":"compulsory_major"},{"id":"course-234","name":"متطلب جامعة 1","credits":3,"type":"compulsory_univ"},{"id":"course-235","name":"متطلب جامعة 2","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-236","name":"مشروع تخرج (2)","credits":4,"type":"compulsory_major"},{"id":"course-237","name":"متطلب قسم اختياري","credits":3,"type":"elective_major"},{"id":"course-238","name":"ممارسة مهنة معمارية","credits":2,"type":"compulsory_major"},{"id":"course-239","name":"متطلب جامعة 3","credits":3,"type":"compulsory_univ"},{"id":"course-240","name":"متطلب جامعة 4","credits":3,"type":"compulsory_univ"}]}]}]},{"id":"nursing","nameAr":"التمريض","nameEn":"Nursing","collegeAr":"كلية التمريض","collegeEn":"Faculty of Nursing","totalHours":135,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0305101","code":"0305101","name":"علوم حياتية (1)","credits":3,"type":"compulsory_college"},{"id":"c-0303101","code":"0303101","name":"كيمياء عامة (1)","credits":3,"type":"compulsory_college"},{"id":"c-1403100","code":"1403100","name":"علم التشريح لطلبة التمريض","credits":3,"type":"compulsory_college"},{"id":"c-1402101","code":"1402101","name":"المصطلحات الطبية والكتابة المهنية","credits":2,"type":"compulsory_college"},{"id":"course-241","code":"","name":"متطلب جامعة إجباري","credits":3,"type":"compulsory_univ"},{"id":"course-242","code":"","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-1403101","code":"1403101","name":"علم وظائف الأعضاء لطلبة التمريض","credits":3,"type":"compulsory_college"},{"id":"c-1401110","code":"1401110","name":"أساسيات التمريض","credits":3,"type":"compulsory_major"},{"id":"c-1401112","code":"1401112","name":"أساسيات التمريض السريري","credits":3,"type":"practical"},{"id":"c-0305301","code":"0305301","name":"كيمياء حيوية","credits":3,"type":"compulsory_college"},{"id":"course-243","code":"","name":"متطلب جامعة إجباري","credits":3,"type":"compulsory_univ"},{"id":"course-244","code":"","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-140227","code":"140227","name":"تمريض صحة البالغين (1)","credits":3,"type":"compulsory_major"},{"id":"c-1401229","code":"1401229","name":"تمريض صحة البالغين (1) السريري","credits":3,"type":"practical"},{"id":"c-1401201","code":"1401201","name":"علم الأدوية لطلبة التمريض","credits":3,"type":"compulsory_college"},{"id":"c-0305332","code":"0305332","name":"علم الأحياء الدقيقة","credits":3,"type":"compulsory_college"},{"id":"course-245","code":"","name":"التقييم الصحي","credits":3,"type":"compulsory_major"},{"id":"course-246","code":"","name":"متطلب جامعة","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-1402272","code":"1402272","name":"التغذية التطبيقية","credits":3,"type":"compulsory_major"},{"id":"c-1401228","code":"1401228","name":"تمريض صحة البالغين (2)","credits":3,"type":"compulsory_major"},{"id":"c-1401230","code":"1401230","name":"تمريض صحة البالغين (2) السريري","credits":3,"type":"practical"},{"id":"c-1401200","code":"1401200","name":"الفسيولوجيا المرضية","credits":3,"type":"compulsory_major"},{"id":"course-247","code":"","name":"متطلب جامعة إضافي","credits":3,"type":"compulsory_univ"},{"id":"course-248","code":"","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"مجموعة مساقات التبادل (أ)","nameEn":"Interchange Package A","courses":[{"id":"c-1402340","code":"1402340","name":"تمريض صحة الطفل","credits":3,"type":"compulsory_major"},{"id":"c-1402341","code":"1402341","name":"تمريض صحة الطفل السريري","credits":3,"type":"practical"},{"id":"c-1402301","code":"1402301","name":"النمو والتطور عند الطفل","credits":3,"type":"compulsory_major"},{"id":"c-1403324","code":"1403324","name":"تمريض الكوارث والطوارئ","credits":2,"type":"compulsory_major"},{"id":"c-1402330","code":"1402330","name":"تمريض صحة الأم وحديثي الولادة","credits":3,"type":"compulsory_major"},{"id":"c-1402331","code":"1402331","name":"تمريض صحة الأم وحديثي الولادة السريري","credits":3,"type":"practical"}]},{"semesterId":"second","nameAr":"مجموعة مساقات التبادل (ب)","nameEn":"Interchange Package B","courses":[{"id":"c-1403460","code":"1403460","name":"تمريض الصحة النفسية","credits":3,"type":"compulsory_major"},{"id":"c-1403461","code":"1403461","name":"تمريض الصحة النفسية السريري","credits":3,"type":"practical"},{"id":"c-1401425","code":"1401425","name":"تمريض الرعاية الحثيثة","credits":3,"type":"compulsory_major"},{"id":"c-1401428","code":"1401428","name":"تمريض الرعاية الحثيثة السريري","credits":3,"type":"practical"},{"id":"c-1403352","code":"1403352","name":"التثقيف الصحي ومهارات الاتصال","credits":3,"type":"compulsory_major"},{"id":"course-249","code":"","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-1403452","code":"1403452","name":"تمريض صحة المجتمع والأمراض السارية","credits":3,"type":"compulsory_major"},{"id":"c-1403456","code":"1403456","name":"تمريض صحة المجتمع السريري","credits":3,"type":"practical"},{"id":"c-1403457","code":"1403457","name":"تمريض المسنين","credits":1,"type":"compulsory_major"},{"id":"c-1403458","code":"1403458","name":"تمريض المسنين السريري","credits":3,"type":"practical"},{"id":"c-1403330","code":"1403330","name":"بحث علمي وإحصاء حيوي","credits":3,"type":"compulsory_major"},{"id":"course-250","code":"","name":"متطلب كلية اختياري","credits":2,"type":"elective_college"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-1401470","code":"1401470","name":"الإدارة والقيادة في التمريض","credits":3,"type":"compulsory_major"},{"id":"c-1401472","code":"1401472","name":"الإدارة والقيادة في التمريض السريري","credits":2,"type":"practical"},{"id":"c-1401480","code":"1401480","name":"التدريب السريري المتقدم","credits":5,"type":"practical"},{"id":"course-251","code":"","name":"متطلب جامعة اختياري","credits":3,"type":"elective_univ"},{"id":"course-252","code":"","name":"متطلب كلية اختياري","credits":2,"type":"elective_college"}]}]}]},{"id":"plant_production","nameAr":"الإنتاج النباتي","nameEn":"Plant Production","collegeAr":"كلية الزراعة","collegeEn":"Faculty of Agriculture","totalHours":133,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-253","name":"كيمياء عامة (1)","credits":3,"type":"compulsory_college"},{"id":"course-254","name":"علوم حياتية عامة (1)","credits":3,"type":"compulsory_college"},{"id":"course-255","name":"رياضيات وإحصاء زراعي","credits":3,"type":"compulsory_college"},{"id":"course-256","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"course-257","name":"متطلب جامعة اختيارية","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-258","name":"كيمياء عضوية حيوية","credits":3,"type":"compulsory_college"},{"id":"course-259","name":"علم النبات العام","credits":3,"type":"compulsory_major"},{"id":"course-260","name":"مبادئ الاقتصاد الزراعي","credits":3,"type":"compulsory_college"},{"id":"course-261","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"course-262","name":"متطلب جامعة اختيارية","credits":3,"type":"elective_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-263","name":"مبادئ علم التربة","credits":3,"type":"compulsory_major"},{"id":"course-264","name":"فسيولوجيا النبات","credits":3,"type":"compulsory_major"},{"id":"course-265","name":"مبادئ الإنتاج النباتي","credits":3,"type":"compulsory_major"},{"id":"course-266","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"course-267","name":"متطلب كلية اختياري","credits":3,"type":"elective_college"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-268","name":"مبادئ الري والصرف","credits":3,"type":"compulsory_major"},{"id":"course-269","name":"مبادئ وقاية النبات","credits":3,"type":"compulsory_major"},{"id":"course-270","name":"مبادئ الإنتاج الحيواني","credits":3,"type":"compulsory_major"},{"id":"course-271","name":"الإحصاء الزراعي وتصميم التجارب","credits":3,"type":"compulsory_college"},{"id":"course-272","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-273","name":"إنتاج خضراوات (1)","credits":3,"type":"compulsory_major"},{"id":"course-274","name":"أشجار فاكهة مستديمة الأوراق","credits":3,"type":"compulsory_major"},{"id":"course-275","name":"إنتاج محاصيل حقلية (1)","credits":3,"type":"compulsory_major"},{"id":"course-276","name":"علم أمراض النبات","credits":3,"type":"compulsory_major"},{"id":"course-277","name":"مبادئ علم الوراثة","credits":3,"type":"compulsory_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-278","name":"إنتاج خضراوات (2)","credits":3,"type":"compulsory_major"},{"id":"course-279","name":"أشجار فاكهة متساقطة الأوراق","credits":3,"type":"compulsory_major"},{"id":"course-280","name":"حشرات اقتصادية","credits":3,"type":"compulsory_major"},{"id":"course-281","name":"تربية وتحسين النبات","credits":3,"type":"compulsory_major"},{"id":"course-282","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-283","name":"الزراعة المحمية","credits":3,"type":"compulsory_major"},{"id":"course-284","name":"مشاتل وتكثير نبات","credits":3,"type":"compulsory_major"},{"id":"course-285","name":"خصوبة تربة وتسميد","credits":3,"type":"compulsory_major"},{"id":"course-286","name":"ندوة في الإنتاج النباتي","credits":1,"type":"compulsory_major"},{"id":"course-287","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-288","name":"تطبيقات عملية في الإنتاج النباتي","credits":3,"type":"practical"},{"id":"course-289","name":"ت.ع في إنتاج المحاصيل الحقلية","credits":2,"type":"practical"},{"id":"course-290","name":"ت.ع في الزينة وتنسيق الحدائق","credits":2,"type":"practical"},{"id":"course-291","name":"ت.ع في المكافحة المتكاملة للحشرات والحلم","credits":2,"type":"practical"},{"id":"course-292","name":"متطلب تخصص اختياري 1","credits":3,"type":"elective_major"},{"id":"course-293","name":"متطلب تخصص اختياري 2","credits":3,"type":"elective_major"}]}]}]},{"id":"arabic_lang","nameAr":"اللغة العربية وآدابها","nameEn":"Arabic Language","collegeAr":"كلية الآداب","collegeEn":"Faculty of Arts","totalHours":133,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-294","name":"مهارات اللغة العربية (1)","credits":3,"type":"compulsory_univ"},{"id":"course-295","name":"مهارات اللغة الإنجليزية (1)","credits":3,"type":"compulsory_univ"},{"id":"course-296","name":"النحو (1)","credits":3,"type":"compulsory_major"},{"id":"course-297","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"course-298","name":"متطلب جامعة اختيارية","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-299","name":"النحو (2)","credits":3,"type":"compulsory_major"},{"id":"course-300","name":"الصرف","credits":3,"type":"compulsory_major"},{"id":"course-301","name":"العروض وموسيقى الشعر","credits":3,"type":"compulsory_major"},{"id":"course-302","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"course-303","name":"متطلب جامعة اختيارية","credits":3,"type":"elective_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-304","name":"النحو (3)","credits":3,"type":"compulsory_major"},{"id":"course-305","name":"الأدب الجاهلي","credits":3,"type":"compulsory_major"},{"id":"course-306","name":"المعاجم واللغويات","credits":3,"type":"compulsory_major"},{"id":"course-307","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"course-308","name":"متطلب كلية اختياري","credits":3,"type":"elective_college"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-309","name":"النحو (4)","credits":3,"type":"compulsory_major"},{"id":"course-310","name":"أدب صدر الإسلام والأموي","credits":3,"type":"compulsory_major"},{"id":"course-311","name":"البلاغة العربية (البيان والبديع)","credits":3,"type":"compulsory_major"},{"id":"course-312","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"course-313","name":"متطلب كلية اختياري","credits":3,"type":"elective_college"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-314","name":"الأدب العباسي (1)","credits":3,"type":"compulsory_major"},{"id":"course-315","name":"النقد العربي القديم","credits":3,"type":"compulsory_major"},{"id":"course-316","name":"فقه اللغة","credits":3,"type":"compulsory_major"},{"id":"course-317","name":"الأدب الأندلسي","credits":3,"type":"compulsory_major"},{"id":"course-318","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-319","name":"الأدب العباسي (2)","credits":3,"type":"compulsory_major"},{"id":"course-320","name":"أدب العصور المتتابعة","credits":3,"type":"compulsory_major"},{"id":"course-321","name":"النقد الأدبي الحديث","credits":3,"type":"compulsory_major"},{"id":"course-322","name":"متطلب تخصص اختياري 1","credits":3,"type":"elective_major"},{"id":"course-323","name":"متطلب تخصص اختياري 2","credits":3,"type":"elective_major"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"course-324","name":"الأدب العربي الحديث (شعر)","credits":3,"type":"compulsory_major"},{"id":"course-325","name":"اللسانيات الحديثة","credits":3,"type":"compulsory_major"},{"id":"course-326","name":"الأدب المقارن","credits":3,"type":"compulsory_major"},{"id":"course-327","name":"متطلب تخصص اختياري 1","credits":3,"type":"elective_major"},{"id":"course-328","name":"متطلب تخصص اختياري 2","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"course-329","name":"الأدب العربي الحديث (نثر)","credits":3,"type":"compulsory_major"},{"id":"course-330","name":"قضايا لغوية معاصرة","credits":3,"type":"compulsory_major"},{"id":"course-331","name":"مشروع التخرج والمكتبة العربية","credits":3,"type":"compulsory_major"},{"id":"course-332","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]}]}]},{"id":"electrical_eng","nameAr":"الهندسة الكهربائية (قوى وتحكم)","nameEn":"Electrical Engineering","collegeAr":"كلية الهندسة","collegeEn":"Faculty of Engineering","totalHours":163,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0301101","code":"0301101","name":"تفاضل وتكامل 1","credits":3,"type":"compulsory_college"},{"id":"c-0302101","code":"0302101","name":"فيزياء عامة 1","credits":3,"type":"compulsory_college"},{"id":"c-0302111","code":"0302111","name":"فيزياء عامة عملية 1","credits":1,"type":"practical"},{"id":"c-0303101","code":"0303101","name":"كيمياء عامة 1","credits":3,"type":"compulsory_college"},{"id":"c-0303105","code":"0303105","name":"كيمياء عامة عملية 1","credits":1,"type":"practical"},{"id":"c-1802103","code":"1802103","name":"مهارات اللغة الإنجليزية","credits":3,"type":"compulsory_univ"},{"id":"c-1801102","code":"1801102","name":"مهارات اللغة العربية","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0301102","code":"0301102","name":"تفاضل وتكامل 2","credits":3,"type":"compulsory_college"},{"id":"c-0302102","code":"0302102","name":"فيزياء عامة 2","credits":3,"type":"compulsory_college"},{"id":"c-0302112","code":"0302112","name":"فيزياء عامة عملية 2","credits":1,"type":"practical"},{"id":"c-1600106","code":"1600106","name":"التربية الوطنية والمسؤولية المجتمعية","credits":3,"type":"compulsory_univ"},{"id":"c-0101173","code":"0101173","name":"العلوم العسكرية","credits":3,"type":"compulsory_univ"},{"id":"c-2100102","code":"2100102","name":"الريادة والابتكار","credits":3,"type":"compulsory_univ"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"c-0809103","code":"0809103","name":"المهارات الحياتية","credits":3,"type":"compulsory_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0301203","code":"0301203","name":"معادلات تفاضلية عادية 1","credits":3,"type":"compulsory_college"},{"id":"c-0401211","code":"0401211","name":"دوائر كهربائية 1","credits":3,"type":"compulsory_major"},{"id":"c-0402201","code":"0402201","name":"ميكانيكا هندسية","credits":3,"type":"compulsory_major"},{"id":"c-0405112","code":"0405112","name":"البرمجة للمهندسين","credits":3,"type":"compulsory_college"},{"id":"c-0403198","code":"0403198","name":"الرسم الهندسي","credits":2,"type":"compulsory_college"},{"id":"c-0402110","code":"0402110","name":"مشاغل هندسية","credits":1,"type":"compulsory_college"},{"id":"c-0404200","code":"0404200","name":"مهارات الاتصال","credits":2,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0401109","code":"0401109","name":"الإحصاء والاحتمالات والطرق العشوائية","credits":3,"type":"compulsory_major"},{"id":"c-0402307","code":"0402307","name":"تحليلات عددية","credits":3,"type":"compulsory_college"},{"id":"c-0403302","code":"0403302","name":"الاقتصاد الهندسي","credits":3,"type":"compulsory_college"},{"id":"c-0401212","code":"0401212","name":"دوائر كهربائية 2","credits":3,"type":"compulsory_major"},{"id":"c-0401208","code":"0401208","name":"إشارات وأنظمة","credits":3,"type":"compulsory_major"},{"id":"c-0403209","code":"0403209","name":"رسم هندسي بالحاسوب","credits":2,"type":"practical"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0401230","code":"0401230","name":"إلكترونيات وتطبيقات","credits":3,"type":"compulsory_major"},{"id":"c-0401219","code":"0401219","name":"مختبر الدوائر الكهربائية والترشيح","credits":1,"type":"practical"},{"id":"c-0401372","code":"0401372","name":"الآلات الكهربائية 1","credits":3,"type":"compulsory_major"},{"id":"c-0401323","code":"0401323","name":"مبادئ الاتصالات","credits":3,"type":"compulsory_major"},{"id":"c-0405271","code":"0405271","name":"تصميم أنظمة رقمية","credits":3,"type":"compulsory_major"},{"id":"c-0401442","code":"0401442","name":"قياسات وأجهزة","credits":3,"type":"compulsory_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0401376","code":"0401376","name":"الآلات الكهربائية 2","credits":3,"type":"compulsory_major"},{"id":"c-0401464","code":"0401464","name":"إلكترونيات القوى","credits":3,"type":"compulsory_major"},{"id":"c-0401441","code":"0401441","name":"تحكم آلي","credits":3,"type":"compulsory_major"},{"id":"c-0401548","code":"0401548","name":"مختبر تحكم آلي","credits":1,"type":"practical"},{"id":"c-0405486","code":"0405486","name":"معالجات دقيقة وأنظمة مضمنة","credits":3,"type":"compulsory_major"},{"id":"c-0401446","code":"0401446","name":"مختبر قياسات وأجهزة","credits":1,"type":"practical"},{"id":"c-0401448","code":"0401448","name":"مختبر الآلات الكهربائية","credits":1,"type":"practical"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0401543","code":"0401543","name":"تحكم آلي رقمي","credits":3,"type":"compulsory_major"},{"id":"c-0401558","code":"0401558","name":"حاكمات منطقية مبرمجة","credits":3,"type":"compulsory_major"},{"id":"c-0405487","code":"0405487","name":"مختبر تصميم رقمي وأنظمة مضمنة","credits":1,"type":"practical"},{"id":"c-0401597","code":"0401597","name":"أنظمة قيادة الحركات","credits":3,"type":"compulsory_major"},{"id":"c-0401491","code":"0401491","name":"مختبر إلكترونيات القوى","credits":1,"type":"practical"},{"id":"c-0401480","code":"0401480","name":"أنظمة الطاقة المتجددة","credits":3,"type":"compulsory_major"},{"id":"c-0401599","code":"0401599","name":"متطلب جامعة اختياري (1)","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0401481","code":"0401481","name":"أنظمة قوى 1","credits":3,"type":"compulsory_major"},{"id":"c-0401482","code":"0401482","name":"أنظمة قوى 2","credits":3,"type":"compulsory_major"},{"id":"c-0401483","code":"0401483","name":"هندسة عالي الجهد","credits":3,"type":"compulsory_major"},{"id":"c-0401588","code":"0401588","name":"تخصص اختياري (1)","credits":3,"type":"elective_major"},{"id":"c-0401590","code":"0401590","name":"متطلب جامعة اختياري (2)","credits":3,"type":"elective_univ"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"c-0401401","code":"0401401","name":"التدريب الميداني الكهربائي","credits":6,"type":"practical"}]}]},{"yearId":5,"nameAr":"السنة الخامسة","nameEn":"Fifth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"c-0401488","code":"0401488","name":"مختبر أنظمة القوى","credits":1,"type":"practical"},{"id":"c-0401582","code":"0401582","name":"نقل وتوزيع الطاقة","credits":3,"type":"compulsory_major"},{"id":"c-0401587","code":"0401587","name":"وقاية أنظمة القوى","credits":3,"type":"compulsory_major"},{"id":"c-0401585","code":"0401585","name":"مختبر هندسة عالي ووقاية","credits":1,"type":"practical"},{"id":"c-0401500","code":"0401500","name":"مشروع تخرج 1","credits":1,"type":"compulsory_major"},{"id":"c-0401589","code":"0401589","name":"تخصص اختياري (2)","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"c-0401591","code":"0401591","name":"مشروع تخرج 2","credits":3,"type":"compulsory_major"},{"id":"c-0401592","code":"0401592","name":"تخصص اختياري (3)","credits":3,"type":"elective_major"},{"id":"c-0401593","code":"0401593","name":"تخصص اختياري (4)","credits":3,"type":"elective_major"},{"id":"c-0401594","code":"0401594","name":"متطلب جامعة اختياري (3)","credits":3,"type":"elective_univ"},{"id":"c-0401595","code":"0401595","name":"مختبر إضافي متقدم","credits":1,"type":"practical"}]}]}]},{"id":"chemical_eng","nameAr":"الهندسة الكيميائية","nameEn":"Chemical Engineering","collegeAr":"كلية الهندسة","collegeEn":"Faculty of Engineering","totalHours":163,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5000","name":"تفاضل وتكامل 1","credits":3,"type":"compulsory_college"},{"id":"supp-5001","name":"فيزياء عامة 1","credits":3,"type":"compulsory_college"},{"id":"supp-5002","name":"فيزياء عامة عملية","credits":1,"type":"practical"},{"id":"supp-5003","name":"كيمياء عامة 1","credits":3,"type":"compulsory_college"},{"id":"supp-5004","name":"مهارات اللغة العربية","credits":3,"type":"compulsory_univ"},{"id":"supp-5005","name":"مهارات اللغة الإنجليزية","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5006","name":"تفاضل وتكامل 2","credits":3,"type":"compulsory_college"},{"id":"supp-5007","name":"فيزياء عامة 2","credits":3,"type":"compulsory_college"},{"id":"supp-5008","name":"كيمياء عامة 2","credits":3,"type":"compulsory_college"},{"id":"supp-5009","name":"كيمياء عامة عملية","credits":1,"type":"practical"},{"id":"supp-5010","name":"البرمجة الحاسوبية للمهندسين","credits":3,"type":"compulsory_college"},{"id":"supp-5011","name":"علوم عسكرية","credits":3,"type":"compulsory_univ"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"supp-5012","name":"الريادة والابتكار","credits":3,"type":"compulsory_univ"},{"id":"supp-5013","name":"المهارات الحياتية","credits":3,"type":"compulsory_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5014","name":"تفاضل وتكامل 3","credits":3,"type":"compulsory_college"},{"id":"supp-5015","name":"الكيمياء العضوية","credits":3,"type":"compulsory_major"},{"id":"supp-5016","name":"كيمياء عضوية عملية","credits":1,"type":"practical"},{"id":"supp-5017","name":"مبادئ الهندسة الكيميائية 1","credits":3,"type":"compulsory_major"},{"id":"supp-5018","name":"ميكانيكا هندسية","credits":3,"type":"compulsory_major"},{"id":"supp-5019","name":"الرسم الهندسي","credits":2,"type":"compulsory_college"},{"id":"supp-5020","name":"مشاغل هندسية","credits":1,"type":"compulsory_college"},{"id":"supp-5021","name":"مختبر الفيزياء الكيميائية","credits":1,"type":"practical"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5022","name":"معادلات تفاضلية عادية","credits":3,"type":"compulsory_college"},{"id":"supp-5023","name":"الكيمياء الفيزيائية","credits":3,"type":"compulsory_major"},{"id":"supp-5024","name":"مبادئ الهندسة الكيميائية 2","credits":3,"type":"compulsory_major"},{"id":"supp-5025","name":"ميكانيكا الموائع","credits":3,"type":"compulsory_major"},{"id":"supp-5026","name":"تحليل البيانات والتصميم التجريبي","credits":3,"type":"compulsory_major"},{"id":"supp-5027","name":"مهارات اتصال","credits":2,"type":"compulsory_univ"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5028","name":"ديناميكا حرارية للهندسة الكيميائية 1","credits":3,"type":"compulsory_major"},{"id":"supp-5029","name":"انتقال حرارة","credits":3,"type":"compulsory_major"},{"id":"supp-5030","name":"علم وهندسة المواد","credits":3,"type":"compulsory_major"},{"id":"supp-5031","name":"تحليلات عددية","credits":3,"type":"compulsory_college"},{"id":"supp-5032","name":"الرسم الهندسي بالحاسوب","credits":2,"type":"practical"},{"id":"supp-5033","name":"مختبر مائع وحرارة","credits":1,"type":"practical"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5034","name":"ديناميكا حرارية للهندسة الكيميائية 2","credits":3,"type":"compulsory_major"},{"id":"supp-5035","name":"عمليات موحدة 1","credits":3,"type":"compulsory_major"},{"id":"supp-5036","name":"هندسة التفاعلات 1","credits":3,"type":"compulsory_major"},{"id":"supp-5037","name":"اقتصاد هندسي","credits":3,"type":"compulsory_college"},{"id":"supp-5038","name":"تطبيقات حاسوبية في الهندسة الكيميائية 1","credits":3,"type":"practical"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5039","name":"عمليات موحدة 2","credits":3,"type":"compulsory_major"},{"id":"supp-5040","name":"هندسة التفاعلات 2","credits":3,"type":"compulsory_major"},{"id":"supp-5041","name":"مختبر هندسة التفاعلات","credits":1,"type":"practical"},{"id":"supp-5042","name":"تحليل وتشغيل العمليات الكيميائية","credits":3,"type":"compulsory_major"},{"id":"supp-5043","name":"تطبيقات حاسوبية في الهندسة الكيميائية 2","credits":3,"type":"practical"},{"id":"supp-5044","name":"التحليل الآلي","credits":3,"type":"compulsory_major"},{"id":"supp-5045","name":"مختبر انتقال الحرارة والديناميكا الحرارية","credits":1,"type":"practical"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5046","name":"الحلول الإبداعية للمسائل الهندسية","credits":3,"type":"compulsory_major"},{"id":"supp-5047","name":"تصميم معدات واقتصاديات مصانع","credits":3,"type":"compulsory_major"},{"id":"supp-5048","name":"هندسة تكرير البترول","credits":3,"type":"compulsory_major"},{"id":"supp-5049","name":"التربية الوطنية","credits":3,"type":"compulsory_univ"},{"id":"supp-5050","name":"متطلب جامعة اختياري (1)","credits":3,"type":"elective_univ"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"supp-5051","name":"تدريب ميداني كيميائي متميز","credits":6,"type":"practical"}]}]},{"yearId":5,"nameAr":"السنة الخامسة","nameEn":"Fifth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5052","name":"هندسة الصناعات الكيميائية","credits":3,"type":"compulsory_major"},{"id":"supp-5053","name":"مختبر عمليات موحدة","credits":1,"type":"practical"},{"id":"supp-5054","name":"ديناميكا العمليات والتحكم","credits":3,"type":"compulsory_major"},{"id":"supp-5055","name":"تصميم مصانع","credits":3,"type":"compulsory_major"},{"id":"supp-5056","name":"مشروع تخرج 1","credits":1,"type":"compulsory_major"},{"id":"supp-5057","name":"تخصص اختياري (1)","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5058","name":"مشروع تخرج 2","credits":3,"type":"compulsory_major"},{"id":"supp-5059","name":"هندسة السلامة الصناعية","credits":3,"type":"compulsory_major"},{"id":"supp-5060","name":"مختبر التحكم","credits":1,"type":"practical"},{"id":"supp-5061","name":"متطلب جامعة اختياري (2)","credits":3,"type":"elective_univ"}]}]}]},{"id":"mechanical_eng","nameAr":"الهندسة الميكانيكية","nameEn":"Mechanical Engineering","collegeAr":"كلية الهندسة","collegeEn":"Faculty of Engineering","totalHours":163,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5062","name":"تفاضل وتكامل 1","credits":3,"type":"compulsory_college"},{"id":"supp-5063","name":"فيزياء عامة 1","credits":3,"type":"compulsory_college"},{"id":"supp-5064","name":"مختبر فيزياء عامة عملية 1","credits":1,"type":"practical"},{"id":"supp-5065","name":"كيمياء عامة","credits":3,"type":"compulsory_college"},{"id":"supp-5066","name":"مختبر كيمياء عامة عملية","credits":1,"type":"practical"},{"id":"supp-5067","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5068","name":"تفاضل وتكامل 2","credits":3,"type":"compulsory_college"},{"id":"supp-5069","name":"فيزياء عامة 2","credits":3,"type":"compulsory_college"},{"id":"supp-5070","name":"مختبر فيزياء عامة عملية 2","credits":1,"type":"practical"},{"id":"supp-5071","name":"مشاعل هندسية","credits":1,"type":"compulsory_college"},{"id":"supp-5072","name":"الريادة والابتكار","credits":3,"type":"compulsory_univ"},{"id":"supp-5073","name":"متطلب جامعة إجبارية 1","credits":3,"type":"compulsory_univ"},{"id":"supp-5074","name":"متطلب جامعة إجبارية 2","credits":3,"type":"compulsory_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5075","name":"معادلات تفاضلية عادية","credits":3,"type":"compulsory_college"},{"id":"supp-5076","name":"إستاتيكا","credits":3,"type":"compulsory_major"},{"id":"supp-5077","name":"مهارات إتصال","credits":2,"type":"compulsory_univ"},{"id":"supp-5078","name":"مشاعل هندسية متقدمة","credits":1,"type":"compulsory_college"},{"id":"supp-5079","name":"علم المواد الهندسية","credits":3,"type":"compulsory_major"},{"id":"supp-5080","name":"رسم هندسي","credits":2,"type":"compulsory_college"},{"id":"supp-5081","name":"متطلب جامعة إضافي","credits":3,"type":"compulsory_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5082","name":"ديناميكا","credits":3,"type":"compulsory_major"},{"id":"supp-5083","name":"مقاومة المواد","credits":3,"type":"compulsory_major"},{"id":"supp-5084","name":"ديناميكا حرارية (1)","credits":3,"type":"compulsory_major"},{"id":"supp-5085","name":"هندسة كهربائية","credits":3,"type":"compulsory_major"},{"id":"supp-5086","name":"مختبر مواد هندسية","credits":1,"type":"practical"},{"id":"supp-5087","name":"رسم هندسي بالحاسوب","credits":2,"type":"practical"},{"id":"supp-5088","name":"متطلب جامعة إختياري","credits":3,"type":"elective_univ"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5089","name":"الإحتمالات والإحصاء والطرق العشوائية","credits":3,"type":"compulsory_major"},{"id":"supp-5090","name":"ميكانيكا مائع 1","credits":3,"type":"compulsory_major"},{"id":"supp-5091","name":"مختبر مقاومة مواد","credits":1,"type":"practical"},{"id":"supp-5092","name":"مختبر هندسة كهربائية","credits":1,"type":"practical"},{"id":"supp-5093","name":"متطلب جامعة إختياري","credits":3,"type":"elective_univ"},{"id":"supp-5094","name":"الاقتصاد الهندسي","credits":3,"type":"compulsory_college"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5095","name":"تحليل هندسي","credits":3,"type":"compulsory_major"},{"id":"supp-5096","name":"مختبر ميكانيكا الموائع","credits":1,"type":"practical"},{"id":"supp-5097","name":"إنتقال حرارة (1)","credits":3,"type":"compulsory_major"},{"id":"supp-5098","name":"مختبر ديناميكا حرارية","credits":1,"type":"practical"},{"id":"supp-5099","name":"ديناميكا حرارية (2)","credits":3,"type":"compulsory_major"},{"id":"supp-5100","name":"تكنولوجيا قطع المعادن","credits":3,"type":"compulsory_major"},{"id":"supp-5101","name":"رسم آلات","credits":2,"type":"practical"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5102","name":"تحليلات عددية","credits":3,"type":"compulsory_college"},{"id":"supp-5103","name":"اهتزازات ميكانيكية","credits":3,"type":"compulsory_major"},{"id":"supp-5104","name":"مختبر إنتقال حرارة","credits":1,"type":"practical"},{"id":"supp-5105","name":"محركات إحتراق داخلي","credits":3,"type":"compulsory_major"},{"id":"supp-5106","name":"مختبر التصنيع وقطع المعادن","credits":1,"type":"practical"},{"id":"supp-5107","name":"نظرية الآلات","credits":3,"type":"compulsory_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5108","name":"ضبط وإدارة الجودة","credits":3,"type":"compulsory_major"},{"id":"supp-5109","name":"تصميم ميكانيكي 1","credits":3,"type":"compulsory_major"},{"id":"supp-5110","name":"تحكم آلي","credits":3,"type":"compulsory_major"},{"id":"supp-5111","name":"مقدمة في الترايبولوجي","credits":3,"type":"compulsory_major"},{"id":"supp-5112","name":"مختبر محركات إحتراق داخلي والسيارات","credits":1,"type":"practical"},{"id":"supp-5113","name":"مساق تخصص إختياري","credits":3,"type":"elective_major"}]},{"semesterId":"summer","nameAr":"الفصل الصيفي","nameEn":"Summer Semester","courses":[{"id":"supp-5114","name":"التدريب الميداني الميكانيكي","credits":6,"type":"practical"}]}]},{"yearId":5,"nameAr":"السنة الخامسة","nameEn":"Fifth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5115","name":"مساق تخصص إختياري","credits":3,"type":"elective_major"},{"id":"supp-5116","name":"تكنولوجيا تشكيل وقطع المعادن","credits":3,"type":"compulsory_major"},{"id":"supp-5117","name":"مختبر إهتزازات وتحكم آلي","credits":1,"type":"practical"},{"id":"supp-5118","name":"تدفئة وتهوية وتكييف","credits":3,"type":"compulsory_major"},{"id":"supp-5119","name":"الألكترونيات والحاسب الدقيق","credits":3,"type":"compulsory_major"},{"id":"supp-5120","name":"مشروع تخرج 1","credits":1,"type":"compulsory_major"},{"id":"supp-5121","name":"مختبر نظرية الآلات","credits":1,"type":"practical"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5122","name":"مساق تخصص إختياري إضافي","credits":3,"type":"elective_major"},{"id":"supp-5123","name":"البرمجة للمهندسين","credits":3,"type":"compulsory_college"},{"id":"supp-5124","name":"ميكانيكا موائع (2)","credits":3,"type":"compulsory_major"},{"id":"supp-5125","name":"مختبر الألكترونيات والحاسب الدقيق","credits":1,"type":"practical"},{"id":"supp-5126","name":"مشروع تخرج 2","credits":3,"type":"compulsory_major"},{"id":"supp-5127","name":"متطلب جامعة إضافي اختياري متميز","credits":3,"type":"elective_univ"}]}]}]},{"id":"animal_production","nameAr":"الإنتاج الحيواني","nameEn":"Animal Production","collegeAr":"كلية الزراعة","collegeEn":"Faculty of Agriculture","totalHours":133,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5128","name":"كيمياء عامة (1)","credits":3,"type":"compulsory_college"},{"id":"supp-5129","name":"علوم حياتية عامة (1)","credits":3,"type":"compulsory_college"},{"id":"supp-5130","name":"تفاضل وتكامل (1)","credits":3,"type":"compulsory_college"},{"id":"supp-5131","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5132","name":"متطلب جامعة اختيارية","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5133","name":"كيمياء عضوية حيوية","credits":3,"type":"compulsory_college"},{"id":"supp-5134","name":"رياضيات وإحصاء زراعي","credits":3,"type":"compulsory_college"},{"id":"supp-5135","name":"مبادئ الاقتصاد الزراعي","credits":3,"type":"compulsory_college"},{"id":"supp-5136","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5137","name":"متطلب جامعة اختيارية","credits":3,"type":"elective_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5138","name":"كيمياء حيوية عامة","credits":3,"type":"compulsory_major"},{"id":"supp-5139","name":"الأحياء الدقيقة العامة","credits":3,"type":"compulsory_major"},{"id":"supp-5140","name":"مبادئ الإنتاج الحيواني","credits":3,"type":"compulsory_major"},{"id":"supp-5141","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5142","name":"متطلب كلية اختياري","credits":3,"type":"elective_college"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5143","name":"فسيولوجيا حيوان","credits":3,"type":"compulsory_major"},{"id":"supp-5144","name":"مبادئ علم الغذاء والتغذية","credits":3,"type":"compulsory_major"},{"id":"supp-5145","name":"مبادئ الإنتاج النباتي","credits":3,"type":"compulsory_major"},{"id":"supp-5146","name":"الإحصاء الزراعي وتصميم التجارب","credits":3,"type":"compulsory_college"},{"id":"supp-5147","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5148","name":"تغذية حيوان والدواجن","credits":3,"type":"compulsory_major"},{"id":"supp-5149","name":"فسيولوجيا التناسل والإنتاج","credits":3,"type":"compulsory_major"},{"id":"supp-5150","name":"تربية وتحسين الحيوان","credits":3,"type":"compulsory_major"},{"id":"supp-5151","name":"إنتاج أغنام وماعز","credits":3,"type":"compulsory_major"},{"id":"supp-5152","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5153","name":"مواد العلف وتصنيعها","credits":3,"type":"compulsory_major"},{"id":"supp-5154","name":"إنتاج الدواجن","credits":3,"type":"compulsory_major"},{"id":"supp-5155","name":"مبادئ أمراض الحيوان والدواجن","credits":3,"type":"compulsory_major"},{"id":"supp-5156","name":"سلوك ورعاية الحيوان","credits":3,"type":"compulsory_major"},{"id":"supp-5157","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5158","name":"إنتاج أبقار الحليب","credits":3,"type":"compulsory_major"},{"id":"supp-5159","name":"ميكنة مزارع الإنتاج الحيواني","credits":3,"type":"compulsory_major"},{"id":"supp-5160","name":"ندوة في الإنتاج الحيواني","credits":1,"type":"compulsory_major"},{"id":"supp-5161","name":"متطلب تخصص اختياري 1","credits":3,"type":"elective_major"},{"id":"supp-5162","name":"متطلب تخصص اختياري 2","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5163","name":"تطبيقات عملية في الإنتاج الحيواني","credits":3,"type":"practical"},{"id":"supp-5164","name":"إدارة مزارع الإنتاج الحيواني والدواجن","credits":3,"type":"compulsory_major"},{"id":"supp-5165","name":"تقنيات حيوية في الإنتاج الحيواني","credits":3,"type":"compulsory_major"},{"id":"supp-5166","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]}]}]},{"id":"english_lang","nameAr":"اللغة الإنجليزية وآدابها","nameEn":"English Language and Literature","collegeAr":"كلية الآداب","collegeEn":"Faculty of Arts","totalHours":133,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5167","name":"مهارات الاستماع والمحادثة (Listening & Speaking)","credits":3,"type":"compulsory_major"},{"id":"supp-5168","name":"القراءة المستوعبة (Reading Comprehension)","credits":3,"type":"compulsory_major"},{"id":"supp-5169","name":"بناء القواعد (1) (Grammar Building 1)","credits":3,"type":"compulsory_major"},{"id":"supp-5170","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5171","name":"متطلب جامعة اختيارية","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5172","name":"بناء القواعد (2) (Grammar Building 2)","credits":3,"type":"compulsory_major"},{"id":"supp-5173","name":"الإنشاء والكتابة (1) (Paragraph Writing)","credits":3,"type":"compulsory_major"},{"id":"supp-5174","name":"مدخل إلى الأدب الإنجليزي (Introduction to Literature)","credits":3,"type":"compulsory_major"},{"id":"supp-5175","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5176","name":"متطلب جامعة اختيارية","credits":3,"type":"elective_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5177","name":"مقال وكتابة متقدمة (Essay Writing)","credits":3,"type":"compulsory_major"},{"id":"supp-5178","name":"علم الصوتيات الإنجليزي (Phonetics)","credits":3,"type":"compulsory_major"},{"id":"supp-5179","name":"الشعر الإنجليزي القديم (English Poetry)","credits":3,"type":"compulsory_major"},{"id":"supp-5180","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5181","name":"متطلب كلية اختياري","credits":3,"type":"elective_college"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5182","name":"علم وظائف الأصوات (Phonology)","credits":3,"type":"compulsory_major"},{"id":"supp-5183","name":"الرواية الإنجليزية في القرن الثامن عشر (18th Century Novel)","credits":3,"type":"compulsory_major"},{"id":"supp-5184","name":"مقدمة في اللسانيات (Introduction to Linguistics)","credits":3,"type":"compulsory_major"},{"id":"supp-5185","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5186","name":"متطلب كلية اختياري","credits":3,"type":"elective_college"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5187","name":"علم بناء الجملة (Syntax)","credits":3,"type":"compulsory_major"},{"id":"supp-5188","name":"المسرح الإنجليزي (English Drama)","credits":3,"type":"compulsory_major"},{"id":"supp-5189","name":"الأدب الأمريكي (American Literature)","credits":3,"type":"compulsory_major"},{"id":"supp-5190","name":"مبادئ الترجمة (Principles of Translation)","credits":3,"type":"compulsory_major"},{"id":"supp-5191","name":"مساق تخصص اختياري","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5192","name":"علم دلالة الألفاظ (Semantics)","credits":3,"type":"compulsory_major"},{"id":"supp-5193","name":"الأدب العصر الفيكتوري (Victorian Literature)","credits":3,"type":"compulsory_major"},{"id":"supp-5194","name":"ترجمة النصوص الأدبية (Literary Translation)","credits":3,"type":"compulsory_major"},{"id":"supp-5195","name":"متطلب تخصص اختياري 1","credits":3,"type":"elective_major"},{"id":"supp-5196","name":"متطلب تخصص اختياري 2","credits":3,"type":"elective_major"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5197","name":"النقد الأدبي (Literary Criticism)","credits":3,"type":"compulsory_major"},{"id":"supp-5198","name":"الأدب الإنجليزي الحديث (Modern Literature)","credits":3,"type":"compulsory_major"},{"id":"supp-5199","name":"علم اللغة الاجتماعي (Sociolinguistics)","credits":3,"type":"compulsory_major"},{"id":"supp-5200","name":"متطلب تخصص اختياري 1","credits":3,"type":"elective_major"},{"id":"supp-5201","name":"متطلب تخصص اختياري 2","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5202","name":"اللسانيات التطبيقية (Applied Linguistics)","credits":3,"type":"compulsory_major"},{"id":"supp-5203","name":"الأدب المقارن (Comparative Literature)","credits":3,"type":"compulsory_major"},{"id":"supp-5204","name":"ندوة ومشروع تخرج (Seminar & Graduation Project)","credits":3,"type":"compulsory_major"},{"id":"supp-5205","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]}]}]},{"id":"history","nameAr":"بكالوريوس التاريخ","nameEn":"History","collegeAr":"كلية الآداب","collegeEn":"Faculty of Arts","totalHours":133,"years":[{"yearId":1,"nameAr":"السنة الأولى","nameEn":"First Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5206","name":"مدخل إلى علم التاريخ","credits":3,"type":"compulsory_major"},{"id":"supp-5207","name":"تاريخ العرب القديم","credits":3,"type":"compulsory_major"},{"id":"supp-5208","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5209","name":"متطلب جامعة اختيارية","credits":3,"type":"elective_univ"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5210","name":"تاريخ اليونان والرومان","credits":3,"type":"compulsory_major"},{"id":"supp-5211","name":"تاريخ السيرة النبوية والخلافة الراشدة","credits":3,"type":"compulsory_major"},{"id":"supp-5212","name":"متطلب جامعة إجبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5213","name":"متطلب جامعة اختيارية","credits":3,"type":"elective_univ"}]}]},{"yearId":2,"nameAr":"السنة الثانية","nameEn":"Second Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5214","name":"تاريخ الدولة الأموية","credits":3,"type":"compulsory_major"},{"id":"supp-5215","name":"تاريخ أوروبا في العصور الوسطى","credits":3,"type":"compulsory_major"},{"id":"supp-5216","name":"تاريخ صدر الإسلام","credits":3,"type":"compulsory_major"},{"id":"supp-5217","name":"متطلب جامعة جبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5218","name":"متطلب كلية اختياري","credits":3,"type":"elective_college"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5219","name":"تاريخ الدولة العباسية","credits":3,"type":"compulsory_major"},{"id":"supp-5220","name":"تاريخ البيزنطيين","credits":3,"type":"compulsory_major"},{"id":"supp-5221","name":"تاريخ الأندلس","credits":3,"type":"compulsory_major"},{"id":"supp-5222","name":"متطلب جامعة جبارية","credits":3,"type":"compulsory_univ"},{"id":"supp-5223","name":"متطلب كلية اختياري","credits":3,"type":"elective_college"}]}]},{"yearId":3,"nameAr":"السنة الثالثة","nameEn":"Third Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5224","name":"تاريخ الحروب الصليبية","credits":3,"type":"compulsory_major"},{"id":"supp-5225","name":"تاريخ الأيوبيين والمماليك","credits":3,"type":"compulsory_major"},{"id":"supp-5226","name":"تاريخ أوروبا في عصر النهضة","credits":3,"type":"compulsory_major"},{"id":"supp-5227","name":"متطلب تخصص اختياري 1","credits":3,"type":"elective_major"},{"id":"supp-5228","name":"متطلب تخصص اختياري 2","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5229","name":"تاريخ الدولة العثمانية","credits":3,"type":"compulsory_major"},{"id":"supp-5230","name":"تاريخ العرب الحديث","credits":3,"type":"compulsory_major"},{"id":"supp-5231","name":"تاريخ أوروبا الحديث والمستقبل","credits":3,"type":"compulsory_major"},{"id":"supp-5232","name":"متطلب تخصص اختياري 1","credits":3,"type":"elective_major"},{"id":"supp-5233","name":"متطلب تخصص اختياري 2","credits":3,"type":"elective_major"}]}]},{"yearId":4,"nameAr":"السنة الرابعة","nameEn":"Fourth Year","semesters":[{"semesterId":"first","nameAr":"الفصل الأول","nameEn":"First Semester","courses":[{"id":"supp-5234","name":"تاريخ العرب المعاصر","credits":3,"type":"compulsory_major"},{"id":"supp-5235","name":"تاريخ الأردن الحديث والمعاصر","credits":3,"type":"compulsory_major"},{"id":"supp-5236","name":"قضايا العالم المعاصر","credits":3,"type":"compulsory_major"},{"id":"supp-5237","name":"متطلب تخصص اختياري","credits":3,"type":"elective_major"}]},{"semesterId":"second","nameAr":"الفصل الثاني","nameEn":"Second Semester","courses":[{"id":"supp-5238","name":"مناهج البحث التاريخي","credits":3,"type":"compulsory_major"},{"id":"supp-5239","name":"ندوة بحث تخرج","credits":3,"type":"compulsory_major"},{"id":"supp-5240","name":"متطلب تخصص اختياري 1","credits":3,"type":"elective_major"},{"id":"supp-5241","name":"متطلب تخصص اختياري 2","credits":3,"type":"elective_major"}]}]}]}];
+
+    const { createApp, ref, computed, onMounted, onUpdated, nextTick, watch, h, normalizeClass } = Vue;
+
+    // Re-scan the DOM for <i data-lucide> placeholders and swap them for SVG icons
+    // Persisted major selection (null = show the faculty/major selection screen)
+    const MAJOR_KEY = 'mutah_selected_major_v1';
+    const readSavedMajor = () => {
+      try {
+        const id = localStorage.getItem(MAJOR_KEY);
+        return MAJORS_DATA.some(m => m.id === id) ? id : null;
+      } catch (e) { return null; }
+    };
+
+    const refreshIcons = () => { if (window.lucide) lucide.createIcons(); };
+
+    // Icon component: Lucide replaces <i> with <svg>, which would detach nodes that
+    // Vue tracks. This wrapper owns an empty <span>, so Vue never touches the SVG
+    // and icons keep working when names/classes change (menu/x, plus/rotate, load status).
+    const LucideIcon = {
+      name: 'LucideIcon',
+      props: { name: { type: String, required: true } },
+      inheritAttrs: false,
+      setup(props, { attrs }) {
+        const el = ref(null);
+        const draw = () => {
+          if (!el.value || !window.lucide) return;
+          const i = document.createElement('i');
+          i.setAttribute('data-lucide', props.name);
+          const cls = normalizeClass(attrs.class || '');
+          if (cls) i.setAttribute('class', cls);
+          el.value.replaceChildren(i);
+          lucide.createIcons({ root: el.value });
+        };
+        onMounted(draw);
+        onUpdated(draw);
+        return () => h('span', { ref: el, class: 'lucide-icon', 'aria-hidden': 'true' });
+      }
+    };
+
+    const app = createApp({
+      setup() {
+        const lang = ref('ar');
+        const heroMenuOpen = ref(false);
+        const selectedMajorId = ref(readSavedMajor());
+        const activeYearId = ref(1);
+        const activeSemesterId = ref('first');
+        const searchQuery = ref('');
+
+        // Reactive states for saving — keyed per major so progress in one
+        // major never bleeds into another (course IDs can repeat across majors).
+        const completedByMajor = ref({});
+        const plannedByMajor = ref({});
+
+        const isRTL = computed(() => lang.value === 'ar');
+        const pendingCollege = ref('');
+        const pendingMajor = ref('');
+        const hasMajor = computed(() => !!selectedMajorId.value);
+        const startHref = computed(() => hasMajor.value ? '#planner-app' : '#major-select');
+        const planHref = computed(() => hasMajor.value ? '#planner-column' : '#major-select');
+
+        // Group majors by faculty for the selection screen
+        const collegeGroups = computed(() => {
+          const groups = [];
+          MAJORS_DATA.forEach(m => {
+            let g = groups.find(x => x.collegeEn === m.collegeEn);
+            if (!g) {
+              g = { key: m.collegeEn.replace(/[^A-Za-z0-9]+/g, '-'), collegeEn: m.collegeEn, nameAr: m.collegeAr, nameEn: m.collegeEn,
+                labelAr: m.collegeAr.replace(/^كلية\s+/, ''), labelEn: m.collegeEn.replace(/^Faculty of\s+/i, ''), majors: [] };
+              groups.push(g);
+            }
+            g.majors.push(m);
+          });
+          return groups;
+        });
+
+        // Local Storage triggers
+        const loadSavedData = () => {
+          try {
+            const completed = localStorage.getItem('stand_univ_completed_v3');
+            if (completed) completedByMajor.value = JSON.parse(completed);
+
+            const planned = localStorage.getItem('stand_univ_planned_v3');
+            if (planned) plannedByMajor.value = JSON.parse(planned);
+          } catch(e) {
+            console.error(e);
+          }
+        };
+
+        const saveToLocalStorage = () => {
+          try {
+            localStorage.setItem('stand_univ_completed_v3', JSON.stringify(completedByMajor.value));
+            localStorage.setItem('stand_univ_planned_v3', JSON.stringify(plannedByMajor.value));
+          } catch (e) {
+            console.error(e);
+          }
+        };
+
+        // Course IDs for the currently selected major only
+        const completedCourseIds = computed(() => completedByMajor.value[selectedMajorId.value] || []);
+        const plannedCourseIds = computed(() => plannedByMajor.value[selectedMajorId.value] || []);
+
+        const toggleLang = () => {
+          lang.value = lang.value === 'ar' ? 'en' : 'ar';
+        };
+
+        // Active Major Object
+        const selectedMajor = computed(() => {
+          return MAJORS_DATA.find(m => m.id === selectedMajorId.value) || MAJORS_DATA[0];
+        });
+
+        // Active Year Object
+        const currentYearData = computed(() => {
+          return selectedMajor.value.years.find(y => y.yearId === activeYearId.value) || selectedMajor.value.years[0];
+        });
+
+        const activeSemesterCourses = computed(() => {
+          const year = currentYearData.value;
+          if (!year) return [];
+          if (year.semesters && year.semesters.length > 0) {
+            const sem = year.semesters.find(s => s.semesterId === activeSemesterId.value) || year.semesters[0];
+            return sem ? sem.courses : [];
+          }
+          return year.courses || [];
+        });
+
+        const isCompleted = (id) => completedCourseIds.value.includes(id);
+        const isPlanned = (id) => plannedCourseIds.value.includes(id);
+
+        const toggleComplete = (id) => {
+          const majorId = selectedMajorId.value;
+          const current = completedByMajor.value[majorId] || [];
+          if (current.includes(id)) {
+            completedByMajor.value = { ...completedByMajor.value, [majorId]: current.filter(cid => cid !== id) };
+          } else {
+            completedByMajor.value = { ...completedByMajor.value, [majorId]: [...current, id] };
+            // Remove from planned cart
+            const plannedCurrent = plannedByMajor.value[majorId] || [];
+            plannedByMajor.value = { ...plannedByMajor.value, [majorId]: plannedCurrent.filter(cid => cid !== id) };
+          }
+          saveToLocalStorage();
+        };
+
+        const togglePlan = (id) => {
+          const majorId = selectedMajorId.value;
+          if ((completedByMajor.value[majorId] || []).includes(id)) return;
+
+          const current = plannedByMajor.value[majorId] || [];
+          if (current.includes(id)) {
+            plannedByMajor.value = { ...plannedByMajor.value, [majorId]: current.filter(cid => cid !== id) };
+          } else {
+            plannedByMajor.value = { ...plannedByMajor.value, [majorId]: [...current, id] };
+          }
+          saveToLocalStorage();
+        };
+
+        // Planner header: faculty list (unique) + majors of the current faculty only
+        const headerCollegeKey = computed(() => selectedMajor.value.collegeEn.replace(/[^A-Za-z0-9]+/g, '-'));
+        const headerMajors = computed(() => {
+          const g = collegeGroups.value.find(x => x.key === headerCollegeKey.value);
+          return g ? g.majors : [];
+        });
+        const onHeaderCollegeChange = (key) => {
+          const g = collegeGroups.value.find(x => x.key === key);
+          if (g && g.majors.length) {
+            selectedMajorId.value = g.majors[0].id;
+            handleMajorChange();
+          }
+        };
+
+        const majorsOfCollege = computed(() => {
+          const g = collegeGroups.value.find(x => x.key === pendingCollege.value);
+          return g ? g.majors : [];
+        });
+
+        // Changing the faculty clears the major; a faculty with one major pre-selects it
+        const onCollegeChange = () => {
+          const list = majorsOfCollege.value;
+          pendingMajor.value = list.length === 1 ? list[0].id : '';
+        };
+
+        const selectMajor = (id) => {
+          if (!MAJORS_DATA.some(m => m.id === id)) return;
+          selectedMajorId.value = id;
+          activeYearId.value = 1;
+          activeSemesterId.value = 'first';
+          searchQuery.value = '';
+          nextTick(() => {
+            const el = document.getElementById('planner-app');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        };
+
+        const resetMajor = () => {
+          const cur = MAJORS_DATA.find(m => m.id === selectedMajorId.value);
+          if (cur) {
+            pendingCollege.value = cur.collegeEn.replace(/[^A-Za-z0-9]+/g, '-');
+            pendingMajor.value = cur.id;
+          }
+          selectedMajorId.value = null;
+          searchQuery.value = '';
+          nextTick(() => {
+            const el = document.getElementById('major-select');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        };
+
+        const handleMajorChange = () => {
+          activeYearId.value = 1;
+          activeSemesterId.value = 'first';
+          searchQuery.value = '';
+        };
+
+        // Calculations & statistics
+        const completedSum = computed(() => {
+          let sum = 0;
+          selectedMajor.value.years.forEach(year => {
+            if (year.semesters) {
+              year.semesters.forEach(sem => {
+                sem.courses.forEach(c => {
+                  if (completedCourseIds.value.includes(c.id)) {
+                    sum += c.credits;
+                  }
+                });
+              });
+            } else if (year.courses) {
+              year.courses.forEach(c => {
+                if (completedCourseIds.value.includes(c.id)) {
+                  sum += c.credits;
+                }
+              });
+            }
+          });
+          return sum;
+        });
+
+        const progressPercent = computed(() => {
+          const total = selectedMajor.value.totalHours;
+          if (total <= 0) return 0;
+          return Math.min(100, Math.round((completedSum.value / total) * 100));
+        });
+
+        // Search Course Lists
+        const searchedCourses = computed(() => {
+          if (searchQuery.value.trim() === '') return [];
+          const list = [];
+          
+          selectedMajor.value.years.forEach(year => {
+            const yearName = isRTL.value ? year.nameAr : year.nameEn;
+            if (year.semesters) {
+              year.semesters.forEach(sem => {
+                const semName = isRTL.value ? sem.nameAr : sem.nameEn;
+                sem.courses.forEach(c => {
+                  if (c.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+                      (c.code && c.code.toLowerCase().includes(searchQuery.value.toLowerCase()))) {
+                    list.push({ course: c, yearName, semName });
+                  }
+                });
+              });
+            } else if (year.courses) {
+              year.courses.forEach(c => {
+                if (c.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+                    (c.code && c.code.toLowerCase().includes(searchQuery.value.toLowerCase()))) {
+                  list.push({ course: c, yearName, semName: isRTL.value ? 'مواد عامة' : 'General' });
+                }
+              });
+            }
+          });
+          return list;
+        });
+
+        // Planned Course helper structures
+        const findCourseAnywhere = (id) => {
+          for (const year of selectedMajor.value.years) {
+            if (year.semesters) {
+              for (const sem of year.semesters) {
+                const found = sem.courses.find(c => c.id === id);
+                if (found) return found;
+              }
+            } else if (year.courses) {
+              const found = year.courses.find(c => c.id === id);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+
+        const plannedCoursesList = computed(() => {
+          return plannedCourseIds.value
+            .map(id => findCourseAnywhere(id))
+            .filter(c => c !== null);
+        });
+
+        const plannedCreditsSum = computed(() => {
+          return plannedCoursesList.value.reduce((total, c) => total + c.credits, 0);
+        });
+
+        const loadStatus = computed(() => {
+          const total = plannedCreditsSum.value;
+          if (total === 0) return 'empty';
+          if (total < 12) return 'under';
+          if (total >= 12 && total <= 18) return 'normal';
+          return 'over';
+        });
+
+        const loadText = computed(() => {
+          const status = loadStatus.value;
+          if (status === 'under') {
+            return isRTL.value ? 'أقل من الحد الفصلي الأدنى (تحتاج 12 ساعة على الأقل)' : 'Underloaded (Minimum recommended credit block is 12 hrs)';
+          }
+          if (status === 'normal') {
+            return isRTL.value ? 'عبء فصلي متوازن مثالي (12 - 18 ساعة)' : 'Optimal balanced Load (12 - 18 Credit hrs)';
+          }
+          if (status === 'over') {
+            return isRTL.value ? 'عبء دراسي مرتفع (احتمال الحاجة لموافقة المرشد)' : 'Overload alert! Confirm details with academic advisor';
+          }
+          return '';
+        });
+
+        const loadColor = computed(() => {
+          const status = loadStatus.value;
+          if (status === 'normal') return 'text-emerald-700 border-emerald-400';
+          if (status === 'under') return 'text-amber-700 border-amber-400';
+          return 'text-rose-600 border-rose-400';
+        });
+
+        const loadIcon = computed(() => {
+          const status = loadStatus.value;
+          if (status === 'normal') return 'check';
+          if (status === 'under') return 'alert-triangle';
+          return 'alert-circle';
+        });
+
+        const contextTips = computed(() => {
+          const list = [];
+          const credits = plannedCreditsSum.value;
+          if (credits === 0) {
+            list.push(isRTL.value ? 'اختر بعض المواد بالضغط على (+) لتخطيط مسيرتك الدراسية' : 'Add courses using (+) button to calculate schedule rules');
+            return list;
+          }
+          
+          const hasLab = plannedCoursesList.value.some(c => c.name.includes('عملي') || c.name.includes('مختبر') || c.name.includes('عملية'));
+          const hasMath = plannedCoursesList.value.some(c => c.name.includes('تفاضل') || c.name.includes('فيزياء') || c.name.includes('رياضيات'));
+          
+          if (hasLab) {
+            list.push(isRTL.value ? '⚠️ تم رصد مواد عملية! نسق أوقات المختبرات بعناية لتتلافى التعارض.' : '⚠️ Practical labs found! Keep weekly summaries and double-check timings.');
+          }
+          if (hasMath) {
+            list.push(isRTL.value ? '💡 تم رصد مواد علمية/رياضية. ينصح بحضور كل المحاضرات وحل المسائل أسبوعياً.' : '💡 Scientific or mathematical content matches. Form steady study groups.');
+          }
+          if (credits > 15) {
+            list.push(isRTL.value ? '⚡ جدولك ممتلئ! خطط لدراسة مساندة ونظم أوقات نومك وغذائك لضمان ثبات الإنتاجية.' : '⚡ Full load study schedule! Pacing tasks early prevents exam stress.');
+          }
+          return list;
+        });
+
+        const exportPlan = () => {
+          if (plannedCoursesList.value.length === 0) {
+            alert(isRTL.value ? 'الرجاء إضافة مواد للمخطط أولا بالضغط على (+)' : 'Planner is currently empty. Add courses first!');
+            return;
+          }
+          const credits = plannedCreditsSum.value;
+          const statusTxt = loadText.value;
+          
+          let output = isRTL.value 
+            ? `=== مسودة جدول المواد المقترح للفصل الدراسي القادم ===\nالتخصص: ${selectedMajor.value.nameAr}\nإجمالي الساعات المعتمدة: ${credits} ساعة\nحالة العبء: ${statusTxt}\n\nالمساقات والرموز المقترحة:\n`
+            : `=== Proposed Next Semester Schedule Draft ===\nMajor: ${selectedMajor.value.nameEn}\nTotal planned credits: ${credits} Hours\nStatus: ${statusTxt}\n\nSelected items:\n`;
+            
+          plannedCoursesList.value.forEach((c, idx) => {
+            const codeStr = c.code ? `[${c.code}]` : (isRTL.value ? '[بلا رمز]' : '[No code]');
+            output += ` ${idx + 1}. ${codeStr} - ${c.name} (${c.credits} ${isRTL.value ? 'ساعة معتمدة' : 'Credits'})\n`;
+          });
+          
+          output += isRTL.value 
+            ? `\nتنبيه: هذا الجدول تجريبي للتنسيق. يرجى المسارعة للتسجيل الرسمي عبر بوابة الطالب الجامعية المعتمدة.`
+            : `\nNotice: This is a test draft configuration. Make sure to complete your formal enrollment in the student portal on time.`;
+
+          const blob = new Blob([output], { type: 'text/plain;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `academic_planner_schedule_${credits}_credits.txt`;
+          link.click();
+          URL.revokeObjectURL(url);
+        };
+
+        const getCourseTypeLabel = (type) => {
+          if (isRTL.value) {
+            switch (type) {
+              case 'compulsory_univ': return 'متطلب جامعة إجباري';
+              case 'elective_univ': return 'متطلب جامعة اختياري';
+              case 'elective_college': return 'متطلب كلية اختياري';
+              case 'compulsory_college': return 'متطلب كلية إجباري';
+              case 'compulsory_major': return 'متطلب تخصص إجباري';
+              case 'elective_major': return 'متطلب تخصص اختياري';
+              case 'practical': return 'مساق عملي / مختبر';
+              default: return 'مادة تخصص';
+            }
+          } else {
+            switch (type) {
+              case 'compulsory_univ': return 'Univ Core';
+              case 'elective_univ': return 'Univ Elective';
+              case 'elective_college': return 'College Elective';
+              case 'compulsory_college': return 'College Core';
+              case 'compulsory_major': return 'Major Core';
+              case 'elective_major': return 'Major Elective';
+              case 'practical': return 'Practical / Lab';
+              default: return 'Major Course';
+            }
+          }
+        };
+
+        const getCourseTypeClass = (type) => {
+          switch (type) {
+            case 'compulsory_univ': return 'bg-indigo-50 text-indigo-700 border-indigo-100';
+            case 'elective_univ': return 'bg-sky-50 text-sky-700 border-sky-100';
+            case 'elective_college': return 'bg-teal-50 text-teal-700 border-teal-100';
+            case 'compulsory_college': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+            case 'compulsory_major': return 'bg-slate-100 text-slate-800 border-slate-200';
+            case 'elective_major': return 'bg-violet-50 text-violet-700 border-violet-100';
+            case 'practical': return 'bg-amber-50 text-amber-700 border-amber-100';
+            default: return 'bg-slate-50 text-slate-600 border-slate-100';
+          }
+        };
+
+        // Remember the chosen major in the browser
+        watch(selectedMajorId, (id) => {
+          try {
+            if (id) localStorage.setItem(MAJOR_KEY, id);
+            else localStorage.removeItem(MAJOR_KEY);
+          } catch (e) { console.error(e); }
+        });
+
+        // Keep <html lang/dir> in sync with the UI language (fonts + native RTL behaviour)
+        watch(lang, (l) => {
+          document.documentElement.lang = l;
+          document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+        });
+
+        onMounted(() => {
+          loadSavedData();
+          nextTick(refreshIcons);
+        });
+
+        return {
+          lang,
+          heroMenuOpen,
+          isRTL,
+          hasMajor,
+          startHref,
+          planHref,
+          collegeGroups,
+          pendingCollege,
+          pendingMajor,
+          majorsOfCollege,
+          onCollegeChange,
+          headerCollegeKey,
+          headerMajors,
+          onHeaderCollegeChange,
+          selectMajor,
+          resetMajor,
+          toggleLang,
+          selectedMajorId,
+          allMajors: MAJORS_DATA,
+          selectedMajor,
+          activeYearId,
+          activeSemesterId,
+          searchQuery,
+          currentYearData,
+          activeSemesterCourses,
+          isCompleted,
+          isPlanned,
+          toggleComplete,
+          togglePlan,
+          handleMajorChange,
+          completedSum,
+          progressPercent,
+          searchedCourses,
+          plannedCoursesList,
+          plannedCreditsSum,
+          loadStatus,
+          loadText,
+          loadColor,
+          loadIcon,
+          contextTips,
+          exportPlan,
+          getCourseTypeLabel,
+          getCourseTypeClass
+        };
+      }
+    });
+
+    app.component('lucide-icon', LucideIcon);
+    app.mount('#app');
+
+    // Final safety net: activate any remaining static Lucide placeholders
+    document.addEventListener('DOMContentLoaded', refreshIcons);
+  </script>
+</body>
+</html>
